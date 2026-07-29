@@ -1,0 +1,631 @@
+{
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "蝶变",
+        "navigationBarBackgroundColor": "#0099ff",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/mine/mine",
+      "style": {
+        "navigationBarTitleText": "我的",
+        "navigationBarBackgroundColor": "#0099ff",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/gallery/gallery",
+      "style": {
+        "navigationBarTitleText": "我的作品",
+        "navigationBarBackgroundColor": "#0099ff",
+        "navigationBarTextStyle": "white",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/work-detail/work-detail",
+      "style": {
+        "navigationBarTitleText": "作品详情",
+        "navigationBarBackgroundColor": "#ffffff",
+        "navigationBarTextStyle": "black",
+        "disableSwipeBack": true
+      }
+    }
+  ],
+  "subPackages": [
+    {
+      "root": "package-ai",
+      "pages": [
+        {
+          "path": "production-guide/production-guide",
+          "style": {
+            "navigationBarTitleText": "生产向导",
+            "navigationBarBackgroundColor": "#4f46e5",
+            "navigationBarTextStyle": "white"
+          }
+        },
+        {
+          "path": "simple-ai-workbench/simple-ai-workbench",
+          "style": {
+            "navigationBarTitleText": "AI 出图能力",
+            "navigationBarBackgroundColor": "#4f46e5",
+            "navigationBarTextStyle": "white"
+          }
+        },
+        {
+          "path": "marketing-workbench/marketing-workbench",
+          "style": {
+            "navigationBarTitleText": "营销素材",
+            "navigationBarBackgroundColor": "#4f46e5",
+            "navigationBarTextStyle": "white"
+          }
+        },
+        {
+          "path": "upload/upload",
+          "style": {
+            "navigationBarTitleText": "上传服装图片",
+            "navigationBarBackgroundColor": "#0099ff",
+            "navigationBarTextStyle": "white"
+          }
+        },
+        {
+          "path": "result/result",
+          "style": {
+            "navigationBarTitleText": "生成结果",
+            "navigationBarBackgroundColor": "#0099ff",
+            "navigationBarTextStyle": "white"
+          }
+        },
+        {
+          "path": "change-pose/change-pose",
+          "style": {
+            "navigationBarTitleText": "AI换姿势",
+            "navigationBarBackgroundColor": "#1677ff",
+            "navigationBarTextStyle": "white"
+          }
+        },
+        {
+          "path": "detail-long-image/detail-long-image",
+          "style": {
+            "navigationBarTitleText": "自动排版详情长图",
+            "navigationBarBackgroundColor": "#1677ff",
+            "navigationBarTextStyle": "white"
+          }
+        },
+        {
+          "path": "detail-sku-batch/detail-sku-batch",
+          "style": {
+            "navigationBarTitleText": "同款多色详情长图",
+            "navigationBarBackgroundColor": "#1677ff",
+            "navigationBarTextStyle": "white"
+          }
+        },
+        {
+          "path": "detail-sku-batch-result/detail-sku-batch-result",
+          "style": {
+            "navigationBarTitleText": "批量详情长图结果",
+            "navigationBarBackgroundColor": "#1677ff",
+            "navigationBarTextStyle": "white"
+          }
+        },
+        {
+          "path": "pattern-structure/pattern-structure",
+          "style": {
+            "navigationBarTitleText": "打版结构图",
+            "navigationBarBackgroundColor": "#1677ff",
+            "navigationBarTextStyle": "white"
+          }
+        }
+        // #ifdef H5
+        ,
+        {
+          "path": "pattern-library/pattern-library",
+          "style": {
+            "navigationBarTitleText": "版型库",
+            "navigationBarBackgroundColor": "#1677ff",
+            "navigationBarTextStyle": "white",
+            "enablePullDownRefresh": false
+          }
+        },
+        {
+          "path": "pattern-detail/pattern-detail",
+          "style": {
+            "navigationBarTitleText": "版型详情",
+            "navigationBarBackgroundColor": "#1677ff",
+            "navigationBarTextStyle": "white"
+          }
+        },
+        {
+          "path": "pattern-review-queue/pattern-review-queue",
+          "style": {
+            "navigationBarTitleText": "打版师复核工作台",
+            "navigationBarBackgroundColor": "#1677ff",
+            "navigationBarTextStyle": "white"
+          }
+        },
+        {
+          "path": "pattern-review-detail/pattern-review-detail",
+          "style": {
+            "navigationBarTitleText": "版型复核",
+            "navigationBarBackgroundColor": "#1677ff",
+            "navigationBarTextStyle": "white"
+          }
+        },
+        {
+          "path": "pattern-training-center/pattern-training-center",
+          "style": {
+            "navigationBarTitleText": "AI制版训练数据",
+            "navigationBarBackgroundColor": "#1677ff",
+            "navigationBarTextStyle": "white"
+          }
+        },
+        {
+          "path": "sample-order-list/sample-order-list",
+          "style": {
+            "navigationBarTitleText": "样衣打样",
+            "navigationBarBackgroundColor": "#1677ff",
+            "navigationBarTextStyle": "white"
+          }
+        },
+        {
+          "path": "sample-order-create/sample-order-create",
+          "style": {
+            "navigationBarTitleText": "创建样衣单",
+            "navigationBarBackgroundColor": "#1677ff",
+            "navigationBarTextStyle": "white"
+          }
+        },
+        {
+          "path": "sample-order-detail/sample-order-detail",
+          "style": {
+            "navigationBarTitleText": "样衣详情",
+            "navigationBarBackgroundColor": "#1677ff",
+            "navigationBarTextStyle": "white"
+          }
+        }
+        // #endif
+      ]
+    },
+    {
+      "root": "package-assets",
+      "pages": [
+        {
+          "path": "my-works/my-works",
+          "style": {
+            "navigationBarTitleText": "我的作品中心",
+            "navigationBarBackgroundColor": "#0099ff",
+            "navigationBarTextStyle": "white",
+            "enablePullDownRefresh": true
+          }
+        },
+        {
+          "path": "task-list/task-list",
+          "style": {
+            "navigationBarTitleText": "生产记录",
+            "navigationBarBackgroundColor": "#0099ff",
+            "navigationBarTextStyle": "white"
+          }
+        },
+        {
+          "path": "model-profiles/model-profiles",
+          "style": {
+            "navigationBarTitleText": "常用模特",
+            "navigationBarBackgroundColor": "#1677ff",
+            "navigationBarTextStyle": "white",
+            "enablePullDownRefresh": true
+          }
+        },
+        {
+          "path": "product-profile/product-profile",
+          "style": {
+            "navigationBarTitleText": "商品资料档案",
+            "navigationBarBackgroundColor": "#1677ff",
+            "navigationBarTextStyle": "white"
+          }
+        }
+      ]
+    },
+    {
+      "root": "package-mobile-enterprise",
+      "pages": [
+        {
+          "path": "web-login-confirm/web-login-confirm",
+          "style": {
+            "navigationBarTitleText": "网页登录确认",
+            "navigationBarBackgroundColor": "#722ed1",
+            "navigationBarTextStyle": "white"
+          }
+        },
+        {
+          "path": "project-list/project-list",
+          "style": {
+            "navigationBarTitleText": "项目概览",
+            "navigationBarBackgroundColor": "#722ed1",
+            "navigationBarTextStyle": "white"
+          }
+        },
+        {
+          "path": "project-detail/project-detail",
+          "style": {
+            "navigationBarTitleText": "项目详情",
+            "navigationBarBackgroundColor": "#722ed1",
+            "navigationBarTextStyle": "white"
+          }
+        },
+        {
+          "path": "batch-list/batch-list",
+          "style": {
+            "navigationBarTitleText": "生产记录",
+            "navigationBarBackgroundColor": "#13c2c2",
+            "navigationBarTextStyle": "white"
+          }
+        },
+        {
+          "path": "batch-detail/batch-detail",
+          "style": {
+            "navigationBarTitleText": "生产详情",
+            "navigationBarBackgroundColor": "#13c2c2",
+            "navigationBarTextStyle": "white"
+          }
+        },
+        {
+          "path": "delivery-queue-list/delivery-queue-list",
+          "style": {
+            "navigationBarTitleText": "移动审批",
+            "navigationBarBackgroundColor": "#13c2c2",
+            "navigationBarTextStyle": "white"
+          }
+        },
+        {
+          "path": "delivery-dashboard/delivery-dashboard",
+          "style": {
+            "navigationBarTitleText": "交付状态",
+            "navigationBarBackgroundColor": "#13c2c2",
+            "navigationBarTextStyle": "white"
+          }
+        },
+        {
+          "path": "delivery-action-history/delivery-action-history",
+          "style": {
+            "navigationBarTitleText": "审批记录",
+            "navigationBarBackgroundColor": "#13c2c2",
+            "navigationBarTextStyle": "white"
+          }
+        }
+        // #ifdef H5
+        ,
+        {
+          "path": "small-batch-list/small-batch-list",
+          "style": {
+            "navigationBarTitleText": "小单快反生产",
+            "navigationBarBackgroundColor": "#1677ff",
+            "navigationBarTextStyle": "white"
+          }
+        },
+        {
+          "path": "small-batch-create/small-batch-create",
+          "style": {
+            "navigationBarTitleText": "创建小单生产单",
+            "navigationBarBackgroundColor": "#1677ff",
+            "navigationBarTextStyle": "white"
+          }
+        },
+        {
+          "path": "small-batch-detail/small-batch-detail",
+          "style": {
+            "navigationBarTitleText": "生产详情",
+            "navigationBarBackgroundColor": "#1677ff",
+            "navigationBarTextStyle": "white"
+          }
+        }
+        // #endif
+      ]
+    },
+    {
+      "root": "pages/service-request",
+      "pages": [
+        {
+          "path": "service-request",
+          "style": {
+            "navigationBarTitleText": "提交设计需求",
+            "navigationBarBackgroundColor": "#1677ff",
+            "navigationBarTextStyle": "white"
+          }
+        }
+      ]
+    },
+    {
+      "root": "pages/package-center",
+      "pages": [
+        {
+          "path": "package-center",
+          "style": {
+            "navigationBarTitleText": "会员中心",
+            "navigationBarBackgroundColor": "#1677ff",
+            "navigationBarTextStyle": "white"
+          }
+        },
+        {
+          "path": "usage-records",
+          "style": {
+            "navigationBarTitleText": "额度明细",
+            "navigationBarBackgroundColor": "#1677ff",
+            "navigationBarTextStyle": "white"
+          }
+        }
+      ]
+    },
+    {
+      "root": "pages/settings",
+      "pages": [
+        {
+          "path": "settings",
+          "style": {
+            "navigationBarTitleText": "设置",
+            "navigationBarBackgroundColor": "#0099ff",
+            "navigationBarTextStyle": "white"
+          }
+        }
+      ]
+    },
+    {
+      "root": "pages/status",
+      "pages": [
+        {
+          "path": "status",
+          "style": {
+            "navigationBarTitleText": "系统状态",
+            "navigationStyle": "custom"
+          }
+        }
+      ]
+    }
+    // #ifdef H5
+    ,
+    {
+      "root": "pages/workspace",
+      "pages": [
+        {
+          "path": "workspace",
+          "style": {
+            "navigationBarTitleText": "AI 创作工作台",
+            "navigationBarBackgroundColor": "#0f172a",
+            "navigationBarTextStyle": "white"
+          }
+        },
+        {
+          "path": "project-efficiency",
+          "style": { "navigationBarTitleText": "项目效益中心", "navigationStyle": "custom" }
+        }
+      ]
+    },
+    {
+      "root": "pages/admin",
+      "pages": [
+        {
+          "path": "admin",
+          "style": {
+            "navigationBarTitleText": "企业数据中心",
+            "navigationBarBackgroundColor": "#ff4d4f",
+            "navigationBarTextStyle": "white"
+          }
+        }
+      ]
+    },
+    {
+      "root": "pages/admin-plans",
+      "pages": [{ "path": "admin-plans", "style": { "navigationBarTitleText": "套餐配置", "navigationStyle": "custom" } }]
+    },
+    {
+      "root": "pages/admin-providers",
+      "pages": [{ "path": "admin-providers", "style": { "navigationBarTitleText": "供应商与成本控制", "navigationStyle": "custom" } }]
+    },
+    {
+      "root": "pages/admin-data-health",
+      "pages": [{ "path": "admin-data-health", "style": { "navigationBarTitleText": "数据容灾中心", "navigationStyle": "custom" } }]
+    },
+    {
+      "root": "pages/admin-schema-governance",
+      "pages": [{ "path": "admin-schema-governance", "style": { "navigationBarTitleText": "结构与迁移治理", "navigationStyle": "custom" } }]
+    },
+    {
+      "root": "pages/admin-errors",
+      "pages": [{ "path": "admin-errors", "style": { "navigationBarTitleText": "错误与告警中心", "navigationStyle": "custom" } }]
+    },
+    {
+      "root": "pages/admin-release-control",
+      "pages": [{ "path": "admin-release-control", "style": { "navigationBarTitleText": "发布与灰度中心", "navigationStyle": "custom" } }]
+    },
+    {
+      "root": "pages/admin-incidents",
+      "pages": [{ "path": "admin-incidents", "style": { "navigationBarTitleText": "生产故障应急中心", "navigationStyle": "custom" } }]
+    },
+    {
+      "root": "pages/admin-business-metrics",
+      "pages": [{ "path": "admin-business-metrics", "style": { "navigationBarTitleText": "经营效益中心", "navigationStyle": "custom" } }]
+    },
+    {
+      "root": "pages/admin-product-roadmap",
+      "pages": [{ "path": "admin-product-roadmap", "style": { "navigationBarTitleText": "产品路线图", "navigationStyle": "custom" } }]
+    },
+    {
+      "root": "pages/admin-feature-requests",
+      "pages": [{ "path": "admin-feature-requests", "style": { "navigationBarTitleText": "需求优先级中心", "navigationStyle": "custom" } }]
+    },
+    {
+      "root": "pages/admin-v1-readiness",
+      "pages": [{ "path": "admin-v1-readiness", "style": { "navigationBarTitleText": "V1 完成度看板", "navigationStyle": "custom" } }]
+    },
+    {
+      "root": "pages/admin-compliance",
+      "pages": [{ "path": "admin-compliance", "style": { "navigationBarTitleText": "隐私与合规中心", "navigationStyle": "custom" } }]
+    },
+    {
+      "root": "pages/file-governance",
+      "pages": [{ "path": "file-governance", "style": { "navigationBarTitleText": "文件治理中心", "navigationStyle": "custom" } }]
+    },
+    {
+      "root": "pages/membership-center",
+      "pages": [{ "path": "membership-center", "style": { "navigationBarTitleText": "会员与额度中心", "navigationStyle": "custom" } }]
+    },
+    {
+      "root": "pages/task-admin",
+      "pages": [{ "path": "task-admin", "style": { "navigationBarTitleText": "Task Admin" } }]
+    },
+    {
+      "root": "pages/order-admin",
+      "pages": [{ "path": "order-admin", "style": { "navigationBarTitleText": "Order Admin" } }]
+    },
+    {
+      "root": "pages/project-admin",
+      "pages": [{ "path": "project-admin", "style": { "navigationBarTitleText": "Project Admin" } }]
+    },
+    {
+      "root": "pages/lead-detail",
+      "pages": [{ "path": "lead-detail", "style": { "navigationBarTitleText": "Lead Detail" } }]
+    },
+    {
+      "root": "pages/services",
+      "pages": [{ "path": "services", "style": { "navigationBarTitleText": "服务" } }]
+    },
+    {
+      "root": "pages/pricing",
+      "pages": [{ "path": "pricing", "style": { "navigationBarTitleText": "价格" } }]
+    },
+    {
+      "root": "pages/cases",
+      "pages": [{ "path": "cases", "style": { "navigationBarTitleText": "案例" } }]
+    },
+    {
+      "root": "pages/case-detail",
+      "pages": [{ "path": "case-detail", "style": { "navigationBarTitleText": "案例详情" } }]
+    },
+    {
+      "root": "pages/enterprise",
+      "pages": [{ "path": "enterprise", "style": { "navigationBarTitleText": "企业合作" } }]
+    },
+    {
+      "root": "pages/enterprise-request",
+      "pages": [{ "path": "enterprise-request", "style": { "navigationBarTitleText": "企业需求提交", "navigationStyle": "custom" } }]
+    },
+    {
+      "root": "pages/client-portal",
+      "pages": [{ "path": "client-portal", "style": { "navigationBarTitleText": "客户门户", "navigationStyle": "custom" } }]
+    },
+    {
+      "root": "pages/pro-design",
+      "pages": [{ "path": "pro-design", "style": { "navigationBarTitleText": "专业设计服务" } }]
+    },
+    {
+      "root": "pages/enterprise-solution",
+      "pages": [{ "path": "enterprise-solution", "style": { "navigationBarTitleText": "企业解决方案", "navigationStyle": "custom" } }]
+    },
+    {
+      "root": "pages/case-center",
+      "pages": [{ "path": "case-center", "style": { "navigationBarTitleText": "案例中心", "navigationStyle": "custom" } }]
+    },
+    {
+      "root": "pages/knowledge-center",
+      "pages": [{ "path": "knowledge-center", "style": { "navigationBarTitleText": "知识中心", "navigationStyle": "custom" } }]
+    },
+    {
+      "root": "pages/website-demand",
+      "pages": [{ "path": "website-demand", "style": { "navigationBarTitleText": "蝶变官网", "navigationStyle": "custom" } }]
+    },
+    {
+      "root": "pages/website-demand-success",
+      "pages": [{ "path": "website-demand-success", "style": { "navigationBarTitleText": "提交成功" } }]
+    },
+    {
+      "root": "pages/privacy",
+      "pages": [{ "path": "privacy", "style": { "navigationBarTitleText": "隐私政策", "navigationStyle": "custom" } }]
+    },
+    {
+      "root": "pages/terms",
+      "pages": [{ "path": "terms", "style": { "navigationBarTitleText": "用户协议", "navigationStyle": "custom" } }]
+    },
+    {
+      "root": "pages/workspace-data-consent",
+      "pages": [{ "path": "workspace-data-consent", "style": { "navigationBarTitleText": "数据授权中心", "navigationStyle": "custom" } }]
+    },
+    {
+      "root": "pages/developer",
+      "pages": [
+        { "path": "developer", "style": { "navigationBarTitleText": "企业 API 开放平台", "navigationStyle": "custom" } },
+        { "path": "apps", "style": { "navigationBarTitleText": "企业 API 应用", "navigationStyle": "custom" } },
+        { "path": "api-keys", "style": { "navigationBarTitleText": "API 密钥管理", "navigationStyle": "custom" } },
+        { "path": "usage", "style": { "navigationBarTitleText": "API 调用用量", "navigationStyle": "custom" } },
+        { "path": "logs", "style": { "navigationBarTitleText": "API 调用日志", "navigationStyle": "custom" } },
+        { "path": "docs", "style": { "navigationBarTitleText": "API 开发文档", "navigationStyle": "custom" } }
+      ]
+    },
+    {
+      "root": "pages/enterprise-web",
+      "pages": [
+        { "path": "login", "style": { "navigationBarTitleText": "企业登录", "navigationStyle": "custom" } },
+        { "path": "miniapp-login", "style": { "navigationBarTitleText": "小程序扫码登录", "navigationStyle": "custom" } },
+        { "path": "account-login", "style": { "navigationBarTitleText": "验证码登录", "navigationStyle": "custom" } },
+        { "path": "auth-callback", "style": { "navigationBarTitleText": "微信授权回调", "navigationStyle": "custom" } },
+        { "path": "register", "style": { "navigationBarTitleText": "注册企业", "navigationStyle": "custom" } },
+        { "path": "select-enterprise", "style": { "navigationBarTitleText": "选择企业", "navigationStyle": "custom" } },
+        { "path": "layout", "style": { "navigationBarTitleText": "企业工作台", "navigationStyle": "custom" } },
+        { "path": "dashboard", "style": { "navigationBarTitleText": "经营首页", "navigationStyle": "custom" } },
+        { "path": "projects", "style": { "navigationBarTitleText": "项目管理", "navigationStyle": "custom" } },
+        { "path": "project-detail", "style": { "navigationBarTitleText": "项目详情", "navigationStyle": "custom" } },
+        { "path": "products", "style": { "navigationBarTitleText": "商品资料包", "navigationStyle": "custom" } },
+        { "path": "quotes", "style": { "navigationBarTitleText": "报价管理", "navigationStyle": "custom" } },
+        { "path": "quote-detail", "style": { "navigationBarTitleText": "报价详情", "navigationStyle": "custom" } },
+        { "path": "orders", "style": { "navigationBarTitleText": "订单管理", "navigationStyle": "custom" } },
+        { "path": "order-detail", "style": { "navigationBarTitleText": "订单详情", "navigationStyle": "custom" } },
+        { "path": "deliveries", "style": { "navigationBarTitleText": "交付中心", "navigationStyle": "custom" } },
+        { "path": "delivery-detail", "style": { "navigationBarTitleText": "交付详情", "navigationStyle": "custom" } },
+        { "path": "factories", "style": { "navigationBarTitleText": "工厂协作", "navigationStyle": "custom" } },
+        { "path": "factory-detail", "style": { "navigationBarTitleText": "工厂详情", "navigationStyle": "custom" } },
+        { "path": "members", "style": { "navigationBarTitleText": "成员管理", "navigationStyle": "custom" } },
+        { "path": "roles", "style": { "navigationBarTitleText": "角色权限", "navigationStyle": "custom" } },
+        { "path": "audit", "style": { "navigationBarTitleText": "审计中心", "navigationStyle": "custom" } },
+        { "path": "analytics", "style": { "navigationBarTitleText": "数据中心", "navigationStyle": "custom" } },
+        { "path": "pattern-center", "style": { "navigationBarTitleText": "版型与 AI 训练中心", "navigationStyle": "custom" } }
+      ]
+    }
+    // #endif
+  ],
+  "preloadRule": {
+    "pages/index/index": {
+      "network": "all",
+      "packages": ["package-ai"]
+    }
+  },
+  "tabBar": {
+    "color": "#666666",
+    "selectedColor": "#ff3049",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "static/tab/home.png",
+        "selectedIconPath": "static/tab/home-active.png"
+      },
+      {
+        "pagePath": "pages/gallery/gallery",
+        "text": "作品",
+        "iconPath": "static/tab/work.png",
+        "selectedIconPath": "static/tab/work-active.png"
+      },
+      {
+        "pagePath": "pages/mine/mine",
+        "text": "我的",
+        "iconPath": "static/tab/mine.png",
+        "selectedIconPath": "static/tab/mine-active.png"
+      }
+    ]
+  },
+  "globalStyle": {
+    "backgroundColor": "#f6f6f9"
+  }
+}

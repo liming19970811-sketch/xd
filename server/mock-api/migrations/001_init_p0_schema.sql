@@ -1,0 +1,133 @@
+CREATE TABLE IF NOT EXISTS users (
+  user_id VARCHAR(64) PRIMARY KEY,
+  mobile VARCHAR(32) NOT NULL DEFAULT '',
+  nickname VARCHAR(128) NOT NULL DEFAULT '',
+  avatar_url TEXT NOT NULL DEFAULT '',
+  is_vip BOOLEAN NOT NULL DEFAULT FALSE,
+  left_count INTEGER NOT NULL DEFAULT 0,
+  status VARCHAR(32) NOT NULL DEFAULT 'active',
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS tasks (
+  task_id VARCHAR(64) PRIMARY KEY,
+  user_id VARCHAR(64) NOT NULL DEFAULT '',
+  project_id VARCHAR(64) NOT NULL DEFAULT '',
+  batch_id VARCHAR(64) NOT NULL DEFAULT '',
+  task_type VARCHAR(64) NOT NULL DEFAULT 'model_replace',
+  task_source VARCHAR(64) NOT NULL DEFAULT 'miniapp',
+  status VARCHAR(32) NOT NULL DEFAULT 'draft',
+  stage VARCHAR(64) NOT NULL DEFAULT 'editing',
+  progress INTEGER NOT NULL DEFAULT 0,
+  input_json JSON NOT NULL,
+  result_json JSON NOT NULL,
+  error_json JSON NOT NULL,
+  control_json JSON NOT NULL,
+  summary_json JSON NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  submitted_at TIMESTAMP NULL,
+  completed_at TIMESTAMP NULL
+);
+
+CREATE TABLE IF NOT EXISTS files (
+  file_id VARCHAR(64) PRIMARY KEY,
+  user_id VARCHAR(64) NOT NULL DEFAULT '',
+  biz_type VARCHAR(64) NOT NULL DEFAULT 'lead_attachment',
+  file_name VARCHAR(255) NOT NULL DEFAULT '',
+  file_url TEXT NOT NULL DEFAULT '',
+  local_path TEXT NOT NULL DEFAULT '',
+  mime_type VARCHAR(128) NOT NULL DEFAULT '',
+  status VARCHAR(32) NOT NULL DEFAULT 'uploaded',
+  meta_json JSON NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS packages (
+  package_id VARCHAR(64) PRIMARY KEY,
+  package_type VARCHAR(64) NOT NULL,
+  name VARCHAR(128) NOT NULL,
+  price DECIMAL(10, 2) NOT NULL DEFAULT 0,
+  currency VARCHAR(16) NOT NULL DEFAULT 'CNY',
+  quota INTEGER NOT NULL DEFAULT 0,
+  validity_days INTEGER NOT NULL DEFAULT 30,
+  benefits_json JSON NOT NULL,
+  status VARCHAR(32) NOT NULL DEFAULT 'active',
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS user_packages (
+  user_package_id VARCHAR(64) PRIMARY KEY,
+  user_id VARCHAR(64) NOT NULL,
+  package_id VARCHAR(64) NOT NULL,
+  package_type VARCHAR(64) NOT NULL,
+  status VARCHAR(32) NOT NULL DEFAULT 'active',
+  total_quota INTEGER NOT NULL DEFAULT 0,
+  used_quota INTEGER NOT NULL DEFAULT 0,
+  remaining_quota INTEGER NOT NULL DEFAULT 0,
+  started_at TIMESTAMP NULL,
+  expired_at TIMESTAMP NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS orders (
+  order_id VARCHAR(64) PRIMARY KEY,
+  user_id VARCHAR(64) NOT NULL DEFAULT '',
+  order_type VARCHAR(64) NOT NULL,
+  order_status VARCHAR(32) NOT NULL DEFAULT 'created',
+  pay_status VARCHAR(32) NOT NULL DEFAULT 'unpaid',
+  pay_channel VARCHAR(32) NOT NULL DEFAULT 'wechat',
+  amount DECIMAL(10, 2) NOT NULL DEFAULT 0,
+  package_id VARCHAR(64) NOT NULL DEFAULT '',
+  item_snapshot_json JSON NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS leads (
+  lead_id VARCHAR(64) PRIMARY KEY,
+  source VARCHAR(64) NOT NULL DEFAULT 'website',
+  source_page VARCHAR(128) NOT NULL DEFAULT 'website-demand',
+  source_channel VARCHAR(64) NOT NULL DEFAULT 'website',
+  company_name VARCHAR(255) NOT NULL DEFAULT '',
+  brand_name VARCHAR(255) NOT NULL DEFAULT '',
+  contact_name VARCHAR(255) NOT NULL DEFAULT '',
+  phone VARCHAR(64) NOT NULL DEFAULT '',
+  wechat VARCHAR(128) NOT NULL DEFAULT '',
+  email VARCHAR(255) NOT NULL DEFAULT '',
+  demand_type VARCHAR(64) NOT NULL DEFAULT 'design_service',
+  service_scope_json JSON NOT NULL,
+  product_category VARCHAR(255) NOT NULL DEFAULT '',
+  expected_volume VARCHAR(128) NOT NULL DEFAULT '',
+  expected_delivery_time VARCHAR(128) NOT NULL DEFAULT '',
+  budget_range VARCHAR(128) NOT NULL DEFAULT '',
+  need_sample BOOLEAN NOT NULL DEFAULT FALSE,
+  description TEXT NOT NULL DEFAULT '',
+  reference_images_json JSON NOT NULL,
+  attachment_urls_json JSON NOT NULL,
+  status VARCHAR(32) NOT NULL DEFAULT 'new',
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS projects (
+  project_id VARCHAR(64) PRIMARY KEY,
+  lead_id VARCHAR(64) NOT NULL DEFAULT '',
+  enterprise_id VARCHAR(64) NOT NULL DEFAULT '',
+  project_name VARCHAR(255) NOT NULL DEFAULT '',
+  project_type VARCHAR(64) NOT NULL DEFAULT 'design_service',
+  status VARCHAR(32) NOT NULL DEFAULT 'pending',
+  stage VARCHAR(32) NOT NULL DEFAULT 'discovery',
+  service_scope_json JSON NOT NULL,
+  owner_id VARCHAR(64) NOT NULL DEFAULT '',
+  task_ids_json JSON NOT NULL,
+  batch_ids_json JSON NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  started_at TIMESTAMP NULL,
+  completed_at TIMESTAMP NULL
+);

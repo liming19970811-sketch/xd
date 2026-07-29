@@ -1,0 +1,331 @@
+{
+  "generatedAt": "2026-07-28T21:42:22.776Z",
+  "root": "unpackage/dist/build/mp-weixin",
+  "buildTime": "2026-07-27T14:06:02.116Z",
+  "sourceTime": "2026-07-28T21:42:12.648Z",
+  "stale": true,
+  "status": "warning",
+  "budget": {
+    "mainPackageWarning": 1258291.2,
+    "mainPackageBlocking": 1572864,
+    "subPackageWarning": 1258291.2,
+    "subPackageBlocking": 1572864,
+    "totalWarning": 8388608,
+    "totalBlocking": 12582912,
+    "singleAssetWarning": 204800,
+    "singleAssetBlocking": 1048576,
+    "wechatReference": {
+      "mainPackage": 2097152,
+      "subPackage": 2097152,
+      "total": 20971520,
+      "advisoryOnly": true
+    }
+  },
+  "warnings": [
+    "当前为过期产物趋势报告，不可作为发布包体结论",
+    "主包发现 4 个企业后台依赖线索，请复核静态导入"
+  ],
+  "blockers": [],
+  "totals": {
+    "main": 453787,
+    "all": 1262509,
+    "fileCount": 178
+  },
+  "pages": [
+    "pages/index/index",
+    "pages/mine/mine",
+    "pages/gallery/gallery"
+  ],
+  "preloadRule": {
+    "pages/index/index": {
+      "network": "all",
+      "packages": [
+        "package-ai"
+      ]
+    }
+  },
+  "packages": [
+    {
+      "root": "package-ai",
+      "size": 440362,
+      "fileCount": 20,
+      "independent": false,
+      "pageCount": 5
+    },
+    {
+      "root": "package-assets",
+      "size": 65967,
+      "fileCount": 8,
+      "independent": false,
+      "pageCount": 2
+    },
+    {
+      "root": "package-mobile-enterprise",
+      "size": 273300,
+      "fileCount": 28,
+      "independent": false,
+      "pageCount": 7
+    },
+    {
+      "root": "pages/service-request",
+      "size": 18686,
+      "fileCount": 4,
+      "independent": false,
+      "pageCount": 1
+    },
+    {
+      "root": "pages/package-center",
+      "size": 10407,
+      "fileCount": 4,
+      "independent": false,
+      "pageCount": 1
+    }
+  ],
+  "topFiles": [
+    {
+      "relativePath": "package-ai/simple-ai-workbench/simple-ai-workbench.js",
+      "size": 102383,
+      "packageName": "package-ai",
+      "ext": ".js"
+    },
+    {
+      "relativePath": "package-mobile-enterprise/project-detail/project-detail.js",
+      "size": 83636,
+      "packageName": "package-mobile-enterprise",
+      "ext": ".js"
+    },
+    {
+      "relativePath": "package-ai/result/result.js",
+      "size": 80924,
+      "packageName": "package-ai",
+      "ext": ".js"
+    },
+    {
+      "relativePath": "static/logo.png",
+      "size": 76990,
+      "packageName": "main",
+      "ext": ".png"
+    },
+    {
+      "relativePath": "common/vendor.js",
+      "size": 66565,
+      "packageName": "main",
+      "ext": ".js"
+    },
+    {
+      "relativePath": "package-ai/upload/upload.js",
+      "size": 61348,
+      "packageName": "package-ai",
+      "ext": ".js"
+    },
+    {
+      "relativePath": "package-ai/simple-ai-workbench/simple-ai-workbench.wxml",
+      "size": 43195,
+      "packageName": "package-ai",
+      "ext": ".wxml"
+    },
+    {
+      "relativePath": "package-ai/simple-ai-workbench/simple-ai-workbench.wxss",
+      "size": 39746,
+      "packageName": "package-ai",
+      "ext": ".wxss"
+    },
+    {
+      "relativePath": "package-mobile-enterprise/project-detail/project-detail.wxml",
+      "size": 37907,
+      "packageName": "package-mobile-enterprise",
+      "ext": ".wxml"
+    },
+    {
+      "relativePath": "package-assets/my-works/my-works.js",
+      "size": 30646,
+      "packageName": "package-assets",
+      "ext": ".js"
+    },
+    {
+      "relativePath": "pages/index/index.wxss",
+      "size": 29089,
+      "packageName": "main",
+      "ext": ".wxss"
+    },
+    {
+      "relativePath": "package-ai/result/result.wxml",
+      "size": 24873,
+      "packageName": "package-ai",
+      "ext": ".wxml"
+    },
+    {
+      "relativePath": "package-mobile-enterprise/project-detail/project-detail.wxss",
+      "size": 22668,
+      "packageName": "package-mobile-enterprise",
+      "ext": ".wxss"
+    },
+    {
+      "relativePath": "package-ai/upload/upload.wxml",
+      "size": 22412,
+      "packageName": "package-ai",
+      "ext": ".wxml"
+    },
+    {
+      "relativePath": "package-mobile-enterprise/delivery-dashboard/delivery-dashboard.js",
+      "size": 20637,
+      "packageName": "package-mobile-enterprise",
+      "ext": ".js"
+    },
+    {
+      "relativePath": "package-ai/upload/upload.wxss",
+      "size": 18369,
+      "packageName": "package-ai",
+      "ext": ".wxss"
+    },
+    {
+      "relativePath": "package-mobile-enterprise/project-list/project-list.js",
+      "size": 17360,
+      "packageName": "package-mobile-enterprise",
+      "ext": ".js"
+    },
+    {
+      "relativePath": "package-ai/result/result.wxss",
+      "size": 16900,
+      "packageName": "package-ai",
+      "ext": ".wxss"
+    },
+    {
+      "relativePath": "package-mobile-enterprise/delivery-queue-list/delivery-queue-list.js",
+      "size": 15580,
+      "packageName": "package-mobile-enterprise",
+      "ext": ".js"
+    },
+    {
+      "relativePath": "utils/service/adminRepository.js",
+      "size": 14569,
+      "packageName": "main",
+      "ext": ".js"
+    },
+    {
+      "relativePath": "package-mobile-enterprise/batch-list/batch-list.js",
+      "size": 14142,
+      "packageName": "package-mobile-enterprise",
+      "ext": ".js"
+    },
+    {
+      "relativePath": "package-assets/my-works/my-works.wxss",
+      "size": 13749,
+      "packageName": "package-assets",
+      "ext": ".wxss"
+    },
+    {
+      "relativePath": "utils/constants/advancedPanelPresets.js",
+      "size": 12336,
+      "packageName": "main",
+      "ext": ".js"
+    },
+    {
+      "relativePath": "utils/constants/entryScenePresets.js",
+      "size": 11896,
+      "packageName": "main",
+      "ext": ".js"
+    },
+    {
+      "relativePath": "utils/model/modelLibrary.js",
+      "size": 11692,
+      "packageName": "main",
+      "ext": ".js"
+    },
+    {
+      "relativePath": "pages/index/index.js",
+      "size": 11278,
+      "packageName": "main",
+      "ext": ".js"
+    },
+    {
+      "relativePath": "utils/task/taskLayer.js",
+      "size": 10689,
+      "packageName": "main",
+      "ext": ".js"
+    },
+    {
+      "relativePath": "utils/task/taskActions.js",
+      "size": 10688,
+      "packageName": "main",
+      "ext": ".js"
+    },
+    {
+      "relativePath": "package-assets/my-works/my-works.wxml",
+      "size": 10592,
+      "packageName": "package-assets",
+      "ext": ".wxml"
+    },
+    {
+      "relativePath": "pages/service-request/service-request.js",
+      "size": 9370,
+      "packageName": "pages/service-request",
+      "ext": ".js"
+    }
+  ],
+  "duplicates": [
+    [
+      {
+        "relativePath": "utils/api/generate.js",
+        "size": 48,
+        "packageName": "main"
+      },
+      {
+        "relativePath": "utils/cloudbase/tasksRepository.js",
+        "size": 48,
+        "packageName": "main"
+      }
+    ],
+    [
+      {
+        "relativePath": "utils/constants/file.js",
+        "size": 14,
+        "packageName": "main"
+      },
+      {
+        "relativePath": "utils/constants/package.js",
+        "size": 14,
+        "packageName": "main"
+      }
+    ]
+  ],
+  "potentialUnusedStatic": [],
+  "mainEnterpriseMatches": [
+    {
+      "path": "utils/audit/auditService.js",
+      "matches": [
+        "/auditService/i"
+      ]
+    },
+    {
+      "path": "utils/service/deliveryService.js",
+      "matches": [
+        "/deliveryService/i",
+        "/auditService/i"
+      ]
+    },
+    {
+      "path": "utils/service/orderService.js",
+      "matches": [
+        "/orderService/i",
+        "/auditService/i"
+      ]
+    },
+    {
+      "path": "utils/service/quoteService.js",
+      "matches": [
+        "/quoteService/i",
+        "/auditService/i"
+      ]
+    }
+  ],
+  "mainDevMatches": [],
+  "migratedPageFiles": [],
+  "websiteMigrationScope": [
+    "版型库、版型详情与派生管理",
+    "打版师复核队列与复核详情",
+    "AI制版训练数据与模型评测",
+    "样衣协作与小单生产后台",
+    "企业成员权限、审计、分析、报价和订单后台"
+  ]
+}

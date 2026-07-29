@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Disallow: /#/workspace
+Disallow: /#/workspace/
+Disallow: /#/developer
+Disallow: /#/developer/
+Disallow: /#/enterprise-web
+Disallow: /#/enterprise-web/
+Disallow: /pages/workspace/
+Disallow: /pages/developer/
+Disallow: /pages/enterprise-web/
+Disallow: /pages/admin/
+
+Sitemap: https://www.diebiandesign.com/sitemap.xml

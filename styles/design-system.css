@@ -1,0 +1,288 @@
+/*
+ * Diebian website design system V1.
+ * The tokens are shared by H5 website and professional workspace, while each
+ * surface keeps its own layout boundary.
+ */
+
+:root,
+page {
+  --db-color-primary: #4f46e5;
+  --db-color-primary-strong: #4338ca;
+  --db-color-primary-soft: #eef2ff;
+  --db-color-secondary: #0891b2;
+  --db-color-success: #16a34a;
+  --db-color-success-soft: #f0fdf4;
+  --db-color-warning: #d97706;
+  --db-color-warning-soft: #fff7ed;
+  --db-color-danger: #dc2626;
+  --db-color-danger-soft: #fef2f2;
+  --db-color-page: #f4f6fb;
+  --db-color-surface: #ffffff;
+  --db-color-surface-muted: #f8fafc;
+  --db-color-border: #e2e8f0;
+  --db-color-border-strong: #cbd5e1;
+  --db-color-text: #0f172a;
+  --db-color-text-secondary: #334155;
+  --db-color-text-muted: #64748b;
+  --db-color-text-faint: #94a3b8;
+  --db-color-sidebar: #0f172a;
+  --db-font-size-xs: 11px;
+  --db-font-size-sm: 12px;
+  --db-font-size-md: 14px;
+  --db-font-size-lg: 16px;
+  --db-font-size-xl: 20px;
+  --db-font-size-title: 30px;
+  --db-line-tight: 1.18;
+  --db-line-normal: 1.55;
+  --db-line-relaxed: 1.65;
+  --db-space-1: 4px;
+  --db-space-2: 8px;
+  --db-space-3: 12px;
+  --db-space-4: 16px;
+  --db-space-5: 20px;
+  --db-space-6: 24px;
+  --db-radius-sm: 10px;
+  --db-radius-md: 14px;
+  --db-radius-lg: 18px;
+  --db-radius-pill: 999px;
+  --db-shadow-card: 0 12px 34px rgba(15, 23, 42, .05);
+  --db-shadow-float: 0 18px 46px rgba(15, 23, 42, .14);
+  --db-breakpoint-desktop: 1440px;
+  --db-breakpoint-laptop: 1024px;
+  --db-breakpoint-tablet: 768px;
+  --db-breakpoint-mobile: 480px;
+  --db-control-height: 38px;
+  --db-focus-ring: 0 0 0 3px rgba(79, 70, 229, .2);
+}
+
+.db-page {
+  min-height: 100vh;
+  background: var(--db-color-page);
+  color: var(--db-color-text);
+}
+
+.db-workspace-shell {
+  display: grid;
+  grid-template-columns: 248px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.db-toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--db-space-5);
+}
+
+.db-page-title {
+  margin-top: var(--db-space-1);
+  color: var(--db-color-text);
+  font-size: var(--db-font-size-title);
+  line-height: var(--db-line-tight);
+  font-weight: 950;
+}
+
+.db-card {
+  border: 1px solid rgba(15, 23, 42, .08);
+  border-radius: var(--db-radius-lg);
+  background: var(--db-color-surface);
+  box-shadow: var(--db-shadow-card);
+  box-sizing: border-box;
+}
+
+.db-card-compact {
+  padding: var(--db-space-4);
+}
+
+.db-button,
+.db-button-primary,
+.db-button-secondary,
+.db-button-ghost,
+.db-button-danger {
+  min-height: var(--db-control-height);
+  margin: 0;
+  padding: 0 var(--db-space-4);
+  border-radius: var(--db-radius-pill);
+  box-sizing: border-box;
+  font-size: var(--db-font-size-sm);
+  font-weight: 900;
+  line-height: var(--db-control-height);
+}
+
+.db-button-primary {
+  background: var(--db-color-primary);
+  color: #fff;
+}
+
+.db-button-secondary,
+.db-button-ghost {
+  border: 1px solid var(--db-color-border-strong);
+  background: var(--db-color-surface);
+  color: var(--db-color-text-secondary);
+}
+
+.db-button-ghost {
+  border-color: #c7d2fe;
+  color: var(--db-color-primary-strong);
+}
+
+.db-button-danger {
+  border: 1px solid #fecaca;
+  background: var(--db-color-surface);
+  color: var(--db-color-danger);
+}
+
+.db-button-primary:active,
+.db-button-secondary:active,
+.db-button-ghost:active,
+.db-button-danger:active {
+  transform: translateY(1px);
+}
+
+.db-button-primary[disabled],
+.db-button-secondary[disabled],
+.db-button-ghost[disabled],
+.db-button-danger[disabled],
+.db-is-disabled {
+  cursor: not-allowed;
+  opacity: .56;
+}
+
+.db-button-primary:focus,
+.db-button-secondary:focus,
+.db-button-ghost:focus,
+.db-button-danger:focus,
+.db-input:focus {
+  outline: none;
+  box-shadow: var(--db-focus-ring);
+}
+
+.db-input,
+.db-filter {
+  min-height: var(--db-control-height);
+  padding: 0 var(--db-space-3);
+  border: 1px solid var(--db-color-border);
+  border-radius: var(--db-radius-md);
+  background: var(--db-color-surface);
+  color: var(--db-color-text-secondary);
+  box-sizing: border-box;
+}
+
+.db-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+  padding: 0 var(--db-space-2);
+  border-radius: var(--db-radius-pill);
+  background: var(--db-color-surface-muted);
+  color: var(--db-color-text-muted);
+  font-size: var(--db-font-size-xs);
+  font-weight: 900;
+}
+
+.db-status.is-success {
+  background: var(--db-color-success-soft);
+  color: var(--db-color-success);
+}
+
+.db-status.is-warning {
+  background: var(--db-color-warning-soft);
+  color: var(--db-color-warning);
+}
+
+.db-status.is-danger {
+  background: var(--db-color-danger-soft);
+  color: var(--db-color-danger);
+}
+
+.db-empty,
+.db-error {
+  display: grid;
+  gap: var(--db-space-3);
+  justify-items: start;
+  padding: var(--db-space-5);
+  border: 1px dashed var(--db-color-border-strong);
+  border-radius: var(--db-radius-lg);
+  background: var(--db-color-surface-muted);
+  color: var(--db-color-text-muted);
+  box-sizing: border-box;
+}
+
+.db-error {
+  border-color: #fecaca;
+  background: var(--db-color-danger-soft);
+  color: var(--db-color-danger);
+}
+
+.db-table {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.db-table-row {
+  display: grid;
+  align-items: center;
+  gap: var(--db-space-3);
+  min-width: 720px;
+  padding: 11px var(--db-space-3);
+  border-radius: var(--db-radius-md);
+  background: var(--db-color-surface-muted);
+  color: var(--db-color-text-secondary);
+  font-size: var(--db-font-size-sm);
+}
+
+.db-skeleton {
+  position: relative;
+  overflow: hidden;
+  min-height: 18px;
+  border-radius: var(--db-radius-sm);
+  background: var(--db-color-border);
+}
+
+.db-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .7), transparent);
+  animation: db-skeleton-pulse 1.2s infinite;
+}
+
+@keyframes db-skeleton-pulse {
+  100% { transform: translateX(100%); }
+}
+
+@media (hover: hover) {
+  .db-button-primary:hover,
+  .db-button-secondary:hover,
+  .db-button-ghost:hover {
+    box-shadow: var(--db-focus-ring);
+  }
+}
+
+@media (max-width: 1024px) {
+  .db-workspace-shell {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .db-workspace-shell {
+    display: block;
+  }
+
+  .db-toolbar {
+    display: grid;
+  }
+
+  .db-page-title {
+    font-size: 24px;
+  }
+
+  .db-table-row {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}

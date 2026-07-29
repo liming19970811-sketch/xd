@@ -1,0 +1,132 @@
+export const PERMISSION_CATALOG = Object.freeze([
+  { key: 'ai_output.view', label: '查看 AI 出图', group: 'AI 出图' },
+  { key: 'ai_output.create', label: '创建出图任务', group: 'AI 出图' },
+  { key: 'ai_output.edit', label: '编辑出图任务', group: 'AI 出图' },
+  { key: 'ai_output.delete', label: '删除出图任务', group: 'AI 出图' },
+  { key: 'ai_output.export', label: '导出出图结果', group: 'AI 出图' },
+  { key: 'pattern_making.view', label: '查看 AI 制版', group: 'AI 制版' },
+  { key: 'pattern_making.create', label: '创建制版任务', group: 'AI 制版' },
+  { key: 'pattern_making.edit', label: '编辑制版任务', group: 'AI 制版' },
+  { key: 'pattern_making.approve', label: '审核制版结果', group: 'AI 制版' },
+  { key: 'pattern_library.view', label: '查看版型库', group: '版型库' },
+  { key: 'pattern_library.create', label: '创建版型', group: '版型库' },
+  { key: 'pattern_library.edit', label: '编辑版型', group: '版型库' },
+  { key: 'pattern_library.delete', label: '删除或归档版型', group: '版型库' },
+  { key: 'pattern_library.download', label: '下载版型', group: '版型库' },
+  { key: 'pattern_library.export', label: '导出版型数据', group: '版型库' },
+  { key: 'sample.view', label: '查看样衣单', group: '样衣打样' },
+  { key: 'sample.create', label: '创建样衣单', group: '样衣打样' },
+  { key: 'sample.collaborate', label: '更新打样进度', group: '样衣打样' },
+  { key: 'sample.approve', label: '验收样衣', group: '样衣打样' },
+  { key: 'member.view', label: '\u67e5\u770b\u6210\u5458', group: '\u6210\u5458\u7ba1\u7406' },
+  { key: 'member.manage', label: '\u7ba1\u7406\u6210\u5458', group: '\u6210\u5458\u7ba1\u7406' },
+  { key: 'role.view', label: '\u67e5\u770b\u89d2\u8272', group: '\u89d2\u8272\u6743\u9650' },
+  { key: 'role.manage', label: '\u7ba1\u7406\u89d2\u8272', group: '\u89d2\u8272\u6743\u9650' },
+  { key: 'project.view', label: '\u67e5\u770b\u9879\u76ee', group: '\u9879\u76ee\u7ba1\u7406' },
+  { key: 'project.manage', label: '\u7f16\u8f91\u9879\u76ee', group: '\u9879\u76ee\u7ba1\u7406' },
+  { key: 'project.delete', label: '\u5220\u9664\u9879\u76ee', group: '\u9879\u76ee\u7ba1\u7406' },
+  { key: 'product.view', label: '\u67e5\u770b\u5546\u54c1', group: '\u5546\u54c1\u7ba1\u7406' },
+  { key: 'product.manage', label: '\u7ba1\u7406\u5546\u54c1', group: '\u5546\u54c1\u7ba1\u7406' },
+  { key: 'quote.view', label: '\u67e5\u770b\u62a5\u4ef7', group: '\u62a5\u4ef7\u7ba1\u7406' },
+  { key: 'quote.manage', label: '\u7ba1\u7406\u62a5\u4ef7', group: '\u62a5\u4ef7\u7ba1\u7406' },
+  { key: 'order.view', label: '\u67e5\u770b\u8ba2\u5355', group: '\u8ba2\u5355\u7ba1\u7406' },
+  { key: 'order.manage', label: '\u7ba1\u7406\u8ba2\u5355', group: '\u8ba2\u5355\u7ba1\u7406' },
+  { key: 'batch.view', label: '查看批量任务', group: '批量任务' },
+  { key: 'batch.create', label: '创建批量任务', group: '批量任务' },
+  { key: 'batch.edit', label: '编辑批量任务', group: '批量任务' },
+  { key: 'batch.approve', label: '批量审核', group: '批量任务' },
+  { key: 'batch.delete', label: '删除批量任务', group: '批量任务' },
+  { key: 'delivery.view', label: '\u67e5\u770b\u4ea4\u4ed8', group: '\u4ea4\u4ed8\u7ba1\u7406' },
+  { key: 'delivery.manage', label: '\u7ba1\u7406\u4ea4\u4ed8', group: '\u4ea4\u4ed8\u7ba1\u7406' },
+  { key: 'delivery.approve', label: '\u5ba1\u6838\u4ea4\u4ed8', group: '\u4ea4\u4ed8\u7ba1\u7406' },
+  { key: 'delivery.download', label: '下载交付资产', group: '交付管理' },
+  { key: 'delivery.export', label: '导出交付清单', group: '交付管理' },
+  { key: 'factory.view', label: '查看工厂', group: '工厂协作' },
+  { key: 'factory.manage', label: '管理工厂', group: '工厂协作' },
+  { key: 'factory.quote', label: '管理工厂询报价', group: '工厂协作' },
+  { key: 'factory.collaborate', label: '更新生产协作', group: '工厂协作' },
+  { key: 'audit.view', label: '\u67e5\u770b\u5ba1\u8ba1', group: '\u6570\u636e\u5206\u6790' },
+  { key: 'analytics.view', label: '\u67e5\u770b\u6570\u636e', group: '\u6570\u636e\u5206\u6790' },
+  { key: 'support.view', label: '查看工单', group: '客服工单' },
+  { key: 'support.manage', label: '处理工单', group: '客服工单' },
+  { key: 'quota.view', label: '查看额度', group: '额度管理' },
+  { key: 'quota.manage', label: '调整企业额度', group: '额度管理' },
+  { key: 'settings.view', label: '查看设置', group: '设置' },
+  { key: 'settings.manage', label: '管理设置', group: '设置' }
+])
+
+export const PERMISSION_KEYS = Object.freeze({
+  AI_OUTPUT_VIEW: 'ai_output.view',
+  AI_OUTPUT_CREATE: 'ai_output.create',
+  AI_OUTPUT_EDIT: 'ai_output.edit',
+  AI_OUTPUT_DELETE: 'ai_output.delete',
+  AI_OUTPUT_EXPORT: 'ai_output.export',
+  PATTERN_MAKING_VIEW: 'pattern_making.view',
+  PATTERN_MAKING_CREATE: 'pattern_making.create',
+  PATTERN_MAKING_EDIT: 'pattern_making.edit',
+  PATTERN_MAKING_APPROVE: 'pattern_making.approve',
+  PATTERN_LIBRARY_VIEW: 'pattern_library.view',
+  PATTERN_LIBRARY_CREATE: 'pattern_library.create',
+  PATTERN_LIBRARY_EDIT: 'pattern_library.edit',
+  PATTERN_LIBRARY_DELETE: 'pattern_library.delete',
+  PATTERN_LIBRARY_DOWNLOAD: 'pattern_library.download',
+  PATTERN_LIBRARY_EXPORT: 'pattern_library.export',
+  SAMPLE_VIEW: 'sample.view',
+  SAMPLE_CREATE: 'sample.create',
+  SAMPLE_COLLABORATE: 'sample.collaborate',
+  SAMPLE_APPROVE: 'sample.approve',
+  MEMBER_VIEW: 'member.view',
+  MEMBER_MANAGE: 'member.manage',
+  ROLE_VIEW: 'role.view',
+  ROLE_MANAGE: 'role.manage',
+  PROJECT_VIEW: 'project.view',
+  PROJECT_MANAGE: 'project.manage',
+  PROJECT_DELETE: 'project.delete',
+  PRODUCT_VIEW: 'product.view',
+  PRODUCT_MANAGE: 'product.manage',
+  QUOTE_VIEW: 'quote.view',
+  QUOTE_MANAGE: 'quote.manage',
+  ORDER_VIEW: 'order.view',
+  ORDER_MANAGE: 'order.manage',
+  BATCH_VIEW: 'batch.view',
+  BATCH_CREATE: 'batch.create',
+  BATCH_EDIT: 'batch.edit',
+  BATCH_APPROVE: 'batch.approve',
+  BATCH_DELETE: 'batch.delete',
+  DELIVERY_VIEW: 'delivery.view',
+  DELIVERY_MANAGE: 'delivery.manage',
+  DELIVERY_APPROVE: 'delivery.approve',
+  DELIVERY_DOWNLOAD: 'delivery.download',
+  DELIVERY_EXPORT: 'delivery.export',
+  FACTORY_VIEW: 'factory.view',
+  FACTORY_MANAGE: 'factory.manage',
+  FACTORY_QUOTE: 'factory.quote',
+  FACTORY_COLLABORATE: 'factory.collaborate',
+  AUDIT_VIEW: 'audit.view',
+  ANALYTICS_VIEW: 'analytics.view',
+  SUPPORT_VIEW: 'support.view',
+  SUPPORT_MANAGE: 'support.manage',
+  QUOTA_VIEW: 'quota.view',
+  QUOTA_MANAGE: 'quota.manage',
+  SETTINGS_VIEW: 'settings.view',
+  SETTINGS_MANAGE: 'settings.manage'
+})
+
+export function getPermissionCatalog() {
+  return [...PERMISSION_CATALOG]
+}
+
+export function getPermissionKeys() {
+  return PERMISSION_CATALOG.map((item) => item.key)
+}
+
+export function getPermissionGroups() {
+  const groups = []
+  PERMISSION_CATALOG.forEach((item) => {
+    if (!groups.includes(item.group)) groups.push(item.group)
+  })
+  return groups.map((group) => ({
+    group,
+    permissions: PERMISSION_CATALOG.filter((item) => item.group === group)
+  }))
+}
