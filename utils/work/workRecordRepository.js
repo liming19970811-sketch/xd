@@ -189,7 +189,7 @@ export function upsertWorkRecordFromTask(task = {}, options = {}) {
   const isExperimental = Boolean(taskParams.isExperimental || resultMeta.isExperimental || task.isExperimental || previous.isExperimental)
   const testAccountId = text(taskParams.testAccountId || resultMeta.testAccountId || previous.testAccountId)
   const isMock = isMockOrFallback(task)
-  const resultBadge = isMock ? '流程测试' : isExperimental ? '实验结果' : '正式结果'
+  const resultBadge = isMock || isExperimental ? '不可交付' : '正式结果'
   const next = {
     workId: previous.workId || `work_${taskId}`,
     ownerId,

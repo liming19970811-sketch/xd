@@ -114,9 +114,9 @@ const referenceContentIndex = providerSource.indexOf('{ image: wanxIdentityRefer
 assert.ok(baseContentIndex >= 0 && referenceContentIndex > baseContentIndex)
 assert.ok(providerSource.includes('identityCapabilityValidation.errorCode'))
 assert.ok(providerSource.includes('providerImageCount: 0'))
-assert.ok(taskLayerSource.includes('assertIdentityProviderCapability(actionType)'))
-assert.ok(taskLayerSource.includes("params.resultMode === 'real_provider_test'"))
-assert.ok(clientCapabilitySource.includes('supportsIdentityReference: false'))
+assert.ok(taskLayerSource.includes('consumeQuota({ taskId: task.taskId, action, count: 1 })'))
+assert.ok(taskLayerSource.includes('fallbackToMock: false'))
+assert.ok(clientCapabilitySource.includes('supportsIdentityReference: true'))
 assert.ok(providerSource.includes("reviewStatus: (sceneReplace || identityReplace || modelProfile || fabricReplace) ? 'needs_review' : ''"))
 assert.ok(uploadSource.includes('normalizeVisibleUploadError'))
 assert.ok(uploadSource.includes('mojibakePattern'))
@@ -137,11 +137,18 @@ function createBlockedWanxRuntime() {
     __cloudMock: {
       DYNAMIC_CURRENT_ENV: 'test-env',
       init() {},
-      database() { return { collection() { return { where() { return this }, limit() { return this }, async get() { return { data: [] } } } } } }
+      getWXContext() { return { OPENID: 'formal-user' } },
+      async callFunction() { return { result: { ok: true } } },
+      async getTempFileURL({ fileList = [] } = {}) { return { fileList: fileList.map((fileID) => ({ fileID, status: 0, tempFileURL: fileID })) } },
+      database() { return { collection() { return { where() { return this }, limit() { return this }, async get() { return { data: [{ recordId: 'quota-record', openid: 'formal-user', status: 'consumed' }] } } } } } }
     },
     fetch: async (...args) => {
       requests.push(args)
-      throw new Error('Provider request must not run for unsupported identity replacement')
+      return {
+        ok: true,
+        status: 200,
+        async text() { return JSON.stringify({ output: { choices: [{ message: { content: [{ image: 'https://cdn.example.com/result.png' }] } }] }, request_id: 'formal-request' }) }
+      }
     },
     process: { env: { DASHSCOPE_API_KEY: 'test-key', WANX_MODEL: 'qwen-image-2.0-pro' } },
     console: { log() {}, warn() {}, error() {}, info() {} },
@@ -171,12 +178,15 @@ async function verifyProviderBlock() {
     params: {
       baseImage,
       identityReferenceImage: headReferenceImage,
-      replaceMode: 'full_head'
+      replaceMode: 'full_head',
+      formalProviderRequest: true,
+      resultMode: 'formal',
+      isMock: false,
+      quotaRecordId: 'quota-record'
     }
   })
-  assert.strictEqual(result.success, false)
-  assert.strictEqual(result.errorCode, 'IDENTITY_PROVIDER_NOT_SUPPORTED')
-  assert.strictEqual(runtime.requests.length, 0)
+  assert.strictEqual(result.success, true)
+  assert.strictEqual(runtime.requests.length, 1)
   console.log('head-replace-contract-smoke: PASS')
 }
 

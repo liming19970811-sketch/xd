@@ -361,10 +361,10 @@ import { getTaskCenterSnapshot } from '../../utils/workspace/productionRecordRep
 import { getTaskStatusMeta, normalizeTaskDisplayStatus } from '../../utils/task/taskDisplay'
 import { refreshMembershipUsage } from '../../utils/member/membershipRepository'
 // Production goal contract: product_launch, new_design, marketing. Values live in the shared home capability config.
-import { HOME_BUSINESS_GOALS, HOME_CORE_CAPABILITIES, HOME_MORE_CAPABILITIES, INTERNAL_DEBUG_CAPABILITIES, buildCapabilityUrl } from '../../utils/home/homeCapabilities'
+import { HOME_BUSINESS_GOALS, HOME_CORE_CAPABILITIES, HOME_MORE_CAPABILITIES, PRODUCTION_ADVANCED_CAPABILITIES, buildCapabilityUrl } from '../../utils/home/homeCapabilities'
 import { getHomeWorkbenchSnapshot } from '../../utils/home/homeWorkbenchRepository'
 import { openWebsiteFeature } from '../../utils/navigation/websiteFeatureRouter'
-import { getFeatureRuntimePolicy, isInternalDebugMode, refreshFeatureRuntimeBackendState } from '../../utils/runtime/featureRuntimePolicy'
+import { getFeatureRuntimePolicy, refreshFeatureRuntimeBackendState } from '../../utils/runtime/featureRuntimePolicy'
 // #endif
 // #ifdef H5
 import { ENTERPRISE_SOLUTIONS } from '../../utils/website/solutionData'
@@ -670,7 +670,7 @@ function applyHomeRuntimePolicy(capability = {}) {
   return {
     ...capability,
     enabled: runtime.canAccessFeature,
-    runtimeStatus: hasDestination ? (runtime.capabilityStatus || 'experimental') : 'ui_only',
+    runtimeStatus: hasDestination ? (runtime.capabilityStatus || 'available') : 'ui_only',
     disabledReason: runtime.disabledReason
   }
 }
@@ -683,9 +683,7 @@ function buildRuntimeToolGroups() {
 }
 
 function buildRuntimeAdvancedTools() {
-  const source = isInternalDebugMode()
-    ? [...ADVANCED_TOOLS, ...INTERNAL_DEBUG_CAPABILITIES]
-    : ADVANCED_TOOLS
+  const source = [...ADVANCED_TOOLS, ...PRODUCTION_ADVANCED_CAPABILITIES]
   const seen = new Set()
   return source.filter((item) => {
     if (seen.has(item.id)) return false
@@ -841,16 +839,6 @@ export default {
     refreshOnboardingGuide() {
       const shouldShow = !hasCompletedOnboarding()
       this.showOnboardingGuide = shouldShow
-      if (shouldShow && this.isOnboardingDevelopment()) {
-        console.info('[onboarding:display]', { onboardingShown: true })
-      }
-    },
-    isOnboardingDevelopment() {
-      try {
-        return typeof process !== 'undefined' && ['development', 'dev'].includes(String(process.env && process.env.NODE_ENV || '').toLowerCase())
-      } catch (error) {
-        return false
-      }
     },
     startOnboardingExperience() {
       completeOnboarding('completed')

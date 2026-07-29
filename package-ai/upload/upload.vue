@@ -1121,8 +1121,8 @@ import AiFeatureHeader from '../../components/ai-generation/ai-feature-header.vu
 import GenerationActionBar from '../../components/ai-generation/generation-action-bar.vue'
 import { getMainChainState, patchMainChainState } from '../../utils/mainChainState'
 import { syncDraftTaskToState } from '../../utils/task/taskActions'
-import { getTask, simulateTask } from '../../utils/task/taskLayer'
-import { createInternalRealGenerationTask } from '../../utils/task/generationExecution'
+import { getTask } from '../../utils/task/taskLayer'
+import { createRealGenerationTask } from '../../utils/task/generationExecution'
 import { getRuntimeGenerationConfig, refreshFeatureRuntimeBackendState } from '../../utils/runtime/appRuntimeConfig'
 import { attachBatchTask, createBatchId, createBatchRecord } from '../../utils/task/batchTask'
 import { retryUploadAsset } from '../../utils/task/taskRetry'
@@ -1638,7 +1638,7 @@ export default {
         { key: 'negativePrompt', label: '负面约束' }
       ],
       generationModeOptions: [
-        { value: 'quick', label: '快速', desc: '优先快速生成，适合测试效果。' },
+        { value: 'quick', label: '快速', desc: '优先缩短生成等待时间。' },
         { value: 'standard', label: '标准', desc: '平衡质量和速度，适合常规电商图。' },
         { value: 'creative', label: '创意', desc: '更强场景感和风格化，适合营销图和小红书内容。' }
       ],
@@ -2921,15 +2921,15 @@ export default {
         uni.showToast({ title: this.batchSubmitReason, icon: 'none' })
         return
       }
-      const runtime = getRuntimeGenerationConfig({ providerSupported: false, experimentalProviderSupported: true, provider: 'wanx', modelName: 'qwen-image-2.0-pro', taskType: 'ai_model_image' })
-      if (!runtime.realProviderTest || !runtime.canManageTesting) {
-        uni.showToast({ title: runtime.disabledReason || '仅内部测试账号可提交真实批量任务', icon: 'none' })
+      const runtime = getRuntimeGenerationConfig({ providerSupported: false, providerRouteSupported: true, provider: 'wanx', modelName: 'qwen-image-2.0-pro', taskType: 'ai_model_image' })
+      if (!runtime.canSubmit) {
+        uni.showToast({ title: runtime.disabledReason || '正式 API 配置尚未就绪', icon: 'none' })
         return
       }
       const confirmed = await new Promise((resolve) => {
         uni.showModal({
-          title: '确认真实批量测试',
-          content: `将串行调用 ${this.batchImages.length} 次真实 API，并按每个子任务分别扣费；失败项自动回滚。`,
+          title: '确认批量生成',
+          content: `将生成 ${this.batchImages.length} 个独立结果，并按每个子任务分别扣费；失败项自动回滚。`,
           confirmText: '确认提交',
           success: ({ confirm }) => resolve(Boolean(confirm)),
           fail: () => resolve(false)
@@ -2957,7 +2957,7 @@ export default {
         const children = this.batchImages.map((item, index) => this.buildBatchTaskOptions(payload, item, index, requestedBatchId))
         let batch = createBatchRecord({ batchId: requestedBatchId, totalCount: children.length, batchConfig: { modelCount: children.length, colorCount: 1, sceneCount: 1 } })
         for (const child of children) {
-          const task = await createInternalRealGenerationTask({ ...child, batchId: requestedBatchId }, runtime)
+          const task = await createRealGenerationTask({ ...child, batchId: requestedBatchId }, runtime)
           batch = attachBatchTask(requestedBatchId, task.taskId)
         }
         this.batchCreatedId = batch.batchId
@@ -4497,7 +4497,6 @@ export default {
       return candidates.find((value) => /^https:\/\//.test(String(value || ''))) || ''
     },
     startGenerate(options = {}) {
-      const debugDryRun = !!(options && options.dryRun)
       if (this.isGeneratingValue) {
         console.warn('[upload:generate] skipped generating')
         uni.showToast({
@@ -4506,7 +4505,7 @@ export default {
         })
         return null
       }
-      if (!debugDryRun && !this.clothImageValue.localPath && !this.getAssetFileId(this.clothImageValue) && !this.getAssetFileUrl(this.clothImageValue)) {
+      if (!this.clothImageValue.localPath && !this.getAssetFileId(this.clothImageValue) && !this.getAssetFileUrl(this.clothImageValue)) {
         console.warn('[upload:generate] blocked missing remote cloth image', this.summarizeAssetForLog(this.clothImageValue))
         uni.showToast({
           title: '请先上传服装图',
@@ -4515,13 +4514,13 @@ export default {
         return
       }
 
-      if (!debugDryRun && this.isImageToSketchEntry && !this.hasRemoteClothImage) {
+      if (this.isImageToSketchEntry && !this.hasRemoteClothImage) {
         this.sketchSubmissionState = 'idle'
         uni.showToast({ title: '图片尚未上传完成，请稍候', icon: 'none' })
         return
       }
 
-      if (!debugDryRun && this.isTextToSketchEntry) {
+      if (this.isTextToSketchEntry) {
         if (!this.hasRemoteClothImage) {
           this.styleSketchSubmissionState = 'idle'
           uni.showToast({ title: '图片尚未上传完成，请稍候', icon: 'none' })
@@ -4534,7 +4533,7 @@ export default {
         }
       }
 
-      if (!debugDryRun && this.isSketchRemixEntry) {
+      if (this.isSketchRemixEntry) {
         if (!this.hasRemoteClothImage) {
           this.remixSubmissionState = 'idle'
           uni.showToast({ title: '图片尚未上传完成，请稍候', icon: 'none' })
@@ -4547,7 +4546,7 @@ export default {
         }
       }
 
-      if (!debugDryRun && !this.checkCount()) {
+      if (!this.checkCount()) {
         return
       }
 
@@ -4568,7 +4567,6 @@ export default {
         ...promptPayload
       }
       this.logPreparedAdvancedGenerateParams(params)
-      const debugDryRun = !!(options && options.dryRun)
       const payload = {
         projectId: this.projectIdValue || '',
         batchId: this.batchIdValue || '',
@@ -4616,32 +4614,17 @@ export default {
           }
         }
       }
-      if (debugDryRun) {
-        payload.dryRun = true
-        payload.provider = 'real'
-        payload.idempotencyKey = options.idempotencyKey || `manual_upload_dry_run_${Date.now()}`
-        payload.quotaRecordId = options.quotaRecordId || ''
-        payload.quotaRecordStatus = options.quotaRecordStatus || ''
-        console.log('[upload:generate-dry-run] prepared', {
-          entryScene: this.entryScene || '',
-          templateType: this.templateType || '',
-          costActionType: payload.costActionType || '',
-          dryRun: true,
-          hasQuotaRecordId: !!payload.quotaRecordId,
-          hasIdempotencyKey: !!payload.idempotencyKey
-        })
-      }
       return payload
     },
     async createLocalTaskFromPayload(payload = {}) {
       const runtime = getRuntimeGenerationConfig({
         providerSupported: false,
-        experimentalProviderSupported: true,
+        providerRouteSupported: true,
         provider: 'wanx',
         modelName: 'qwen-image-2.0-pro',
         taskType: payload.taskType || payload.actionType || payload.type || this.templateType || this.entryScene
       })
-      return createInternalRealGenerationTask({
+      return createRealGenerationTask({
         type: (this.isImageToSketchEntry || this.isTextToSketchEntry || this.isSketchRemixEntry) ? this.templateType : (payload.output || this.templateType || this.entryScene || 'model_replace'),
         projectId: payload.projectId || '',
         batchId: payload.batchId || '',
@@ -4845,7 +4828,6 @@ export default {
           })
           return
         }
-        simulateTask(taskId)
         uni.navigateTo({
           url: `/package-ai/result/result?taskId=${encodeURIComponent(taskId)}`
         })

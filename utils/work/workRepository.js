@@ -518,7 +518,7 @@ function normalizeWorkRecord(record = {}, task = {}, production = {}, preference
     quotaRecordId: toText(record.quotaRecordId),
     quotaStatus: toText(record.quotaStatus),
     capabilityStatus: toText(record.capabilityStatus),
-    resultBadge: toText(record.resultBadge) || (record.isMock === true ? '流程测试' : record.isExperimental === true ? '实验结果' : '正式结果'),
+    resultBadge: toText(record.resultBadge) || (record.isMock === true || record.isExperimental === true ? '不可交付' : '正式结果'),
     deliveryEligible: record.deliveryEligible === true,
     isFallback: record.isFallback === true,
     isFavorite: preference.isFavorite === true,

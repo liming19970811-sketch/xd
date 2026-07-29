@@ -4,7 +4,7 @@ const crypto = require('crypto')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 
 const DEFAULT_MOCK_TIER = 'self_799'
-const ENABLE_REAL_QUOTA_GUARD = String(process.env.ENABLE_REAL_QUOTA_GUARD || '').trim().toLowerCase() === 'true'
+const ENABLE_REAL_QUOTA_GUARD = String(process.env.ENABLE_REAL_QUOTA_GUARD || 'true').trim().toLowerCase() === 'true'
 const REAL_MODE_IMPLEMENTED = true
 const USAGE_COLLECTION = 'membership_usage'
 const RECORDS_COLLECTION = 'membership_usage_records'

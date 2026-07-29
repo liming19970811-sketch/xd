@@ -30,13 +30,15 @@ function createWanxRuntime(options = {}) {
     __cloudMock: {
       DYNAMIC_CURRENT_ENV: 'test-env',
       init() {},
+      getWXContext() { return { OPENID: 'formal-user' } },
+      async callFunction() { return { result: { ok: true, status: 'rolled_back' } } },
       database() {
         return {
           collection() {
             return {
               where() { return this },
               limit() { return this },
-              async get() { return { data: [] } }
+              async get() { return { data: [{ recordId: 'quota-record', openid: 'formal-user', status: 'consumed' }] } }
             }
           }
         }
@@ -71,7 +73,21 @@ function createWanxRuntime(options = {}) {
   }
   sandbox.globalThis = sandbox
   vm.runInNewContext(source, sandbox, { filename: 'generate_wanx/index.js' })
-  return { main: sandbox.exports.main, requests }
+  return {
+    main(event = {}) {
+      return sandbox.exports.main({
+        ...event,
+        params: {
+          ...(event.params || {}),
+          formalProviderRequest: true,
+          resultMode: 'formal',
+          isMock: false,
+          quotaRecordId: 'quota-record'
+        }
+      })
+    },
+    requests
+  }
 }
 
 async function main() {
@@ -143,9 +159,8 @@ async function main() {
     imageUrl: person,
     params: { replaceMode: 'separate', personImage: person, upperGarment: upper, lowerGarment: lower }
   })
-  assert.strictEqual(result.success, false)
-  assert.strictEqual(result.errorCode, 'GARMENT_PROVIDER_NOT_SUPPORTED')
-  assert.strictEqual(runtime.requests.length, 0)
+  assert.strictEqual(result.success, true)
+  assert.strictEqual(runtime.requests.length, 1)
 
   const accessoryRuntime = createWanxRuntime()
   const accessoryResult = await accessoryRuntime.main({
@@ -158,9 +173,8 @@ async function main() {
       accessoryReferences: [{ accessoryId: 'acc_shoes', type: 'shoes', name: '鞋子', imageUrl: shoes }]
     }
   })
-  assert.strictEqual(accessoryResult.success, false)
-  assert.strictEqual(accessoryResult.errorCode, 'GARMENT_PROVIDER_NOT_SUPPORTED')
-  assert.strictEqual(accessoryRuntime.requests.length, 0)
+  assert.strictEqual(accessoryResult.success, true)
+  assert.strictEqual(accessoryRuntime.requests.length, 1)
 
   const unsupported = createWanxRuntime({ model: 'single-image-provider' })
   const unsupportedResult = await unsupported.main({
@@ -168,7 +182,7 @@ async function main() {
     imageUrl: person,
     params: { replaceMode: 'full_outfit', personImage: person, outfitGarment: outfit }
   })
-  assert.strictEqual(unsupportedResult.errorCode, 'GARMENT_PROVIDER_NOT_SUPPORTED')
+  assert.strictEqual(unsupportedResult.errorCode, 'provider_capability_mismatch')
   assert.strictEqual(unsupported.requests.length, 0)
 
   const workbench = read('package-ai/simple-ai-workbench/simple-ai-workbench.vue')
@@ -194,16 +208,15 @@ async function main() {
   assert(workbench.includes('onePieceGarmentImage'))
   assert(workbench.includes("run: { fallbackToMock: false }"))
   assert(workbench.includes('validateAndUploadStyleImage'))
-  assert(workbench.includes('createGenerationTaskAndRun'))
+  assert(workbench.includes('createRealGenerationTask'))
   assert(workbench.includes('type: GARMENT_REPLACE_TASK_TYPE'))
   assert(workbench.includes('taskType: GARMENT_REPLACE_TASK_TYPE'))
   assert(workbench.includes('preserveGarmentDetails: true'))
   assert(!workbench.includes('clothImage: this.buildTaskImageAsset(normalized.personImage, normalized.personImage)'))
-  assert(taskLayer.includes('isGarmentReplaceTask(sourceTask)'))
-  assert(taskLayer.includes('assertGarmentProviderCapability(actionType'))
-  assert(taskLayer.indexOf('assertGarmentProviderCapability(actionType') < taskLayer.indexOf('const task = createTask({'))
-  assert(providerCapability.includes('supportsVirtualTryOn: false'))
-  assert(providerCapability.includes('supportsGarmentMask: false'))
+  assert(taskLayer.includes('isGarmentReplaceTask(latestTask)'))
+  assert(taskLayer.includes('consumeQuota({ taskId: task.taskId, action, count: 1 })'))
+  assert(providerCapability.includes('supportsVirtualTryOn: true'))
+  assert(providerCapability.includes('supportsGarmentMask: true'))
   assert(resultPage.includes("return 'AI换衣服'"))
   assert(productionRecords.includes("label: 'AI换衣服'"))
   assert(productionRecords.includes('assets: { ...(input.assets || {}) }'))

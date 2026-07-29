@@ -148,7 +148,7 @@ function generateFabricReplaceRealPlaceholder(input = {}, config = {}) {
     return createFabricReplaceRealFailure(input, validation)
   }
 
-  console.info('[ai_generate:fabricReplace] real placeholder ready', {
+  console.warn('[ai_generate:fabricReplace] real route unavailable', {
     taskId: input.taskId || '',
     sourceTaskId: input.sourceTaskId || '',
     fabricType: input.fabricType || '',
@@ -159,26 +159,10 @@ function generateFabricReplaceRealPlaceholder(input = {}, config = {}) {
     hasIdempotencyKey: true
   })
 
-  return {
-    success: true,
-    ok: true,
-    action: 'fabricReplace',
-    taskId: input.taskId,
-    status: 'success',
-    resultImageUrl: input.sourceImageUrl,
-    data: {
-      provider: 'real_placeholder',
-      requestedProvider: 'fabric_replace',
-      mock: false,
-      fallback: false,
-      actionType: 'fabric_replace',
-      fabricType: input.fabricType || '',
-      sourceTaskId: input.sourceTaskId || '',
-      realProviderReady: false,
-      providerCallSkipped: true,
-      skipReason: 'p2_real_skeleton_no_wanxiang_call'
-    }
-  }
+  return createFabricReplaceRealFailure(input, {
+    reason: 'fabric_replace_provider_route_unavailable',
+    errorCode: 'PROVIDER_ROUTE_NOT_IMPLEMENTED'
+  })
 }
 
 function createFallbackResult(reason, errorCode, details = {}) {
@@ -190,7 +174,7 @@ function createFallbackResult(reason, errorCode, details = {}) {
     errorCode: publicErrorCode,
     fallbackErrorCode: publicErrorCode,
     details,
-    fallbackToMock: true
+    fallbackToMock: false
   }
 }
 

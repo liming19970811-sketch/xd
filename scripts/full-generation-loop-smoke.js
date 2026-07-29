@@ -82,8 +82,8 @@ function run() {
   assert.ok(execution.includes('createGenerationTaskAndRun'))
   assert.ok(execution.includes('createGenerationExecution'))
   assert.ok(workspace.includes('createGenerationExecution'))
-  assert.ok(workbench.includes('createGenerationTaskAndRun'))
-  assert.ok(upload.includes('createInternalRealGenerationTask'))
+  assert.ok(workbench.includes('createRealGenerationTask'))
+  assert.ok(upload.includes('createRealGenerationTask'))
   assert.ok(marketing.includes('createGenerationTaskAndRun'))
 
   console.log('FULL_GENERATION_LOOP_SMOKE_OK features=13 counts=single,multi,batch statuses=canonical')

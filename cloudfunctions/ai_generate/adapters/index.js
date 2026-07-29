@@ -1,17 +1,9 @@
-const { generateMockResult } = require('./mock')
 const { generateRealResult } = require('./real')
 
-function getAdapter(provider = 'mock') {
-  if (provider === 'real') {
-    return {
-      name: 'real',
-      generate: generateRealResult
-    }
-  }
-
+function getAdapter() {
   return {
-    name: 'mock',
-    generate: generateMockResult
+    name: 'real',
+    generate: generateRealResult
   }
 }
 

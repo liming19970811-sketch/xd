@@ -30,6 +30,8 @@ function createWanxRuntime(options = {}) {
     __cloudMock: {
       DYNAMIC_CURRENT_ENV: 'test-env',
       init() {},
+      getWXContext() { return { OPENID: 'formal-user' } },
+      async callFunction() { return { result: { ok: true, status: 'rolled_back' } } },
       database() {
         return {
           collection() {
@@ -37,7 +39,7 @@ function createWanxRuntime(options = {}) {
               where() {
                 return {
                   limit() {
-                    return { async get() { return { data: [] } } }
+                    return { async get() { return { data: [{ recordId: 'quota-record', openid: 'formal-user', status: 'consumed' }] } } }
                   }
                 }
               }
@@ -88,7 +90,21 @@ function createWanxRuntime(options = {}) {
   }
   sandbox.globalThis = sandbox
   vm.runInNewContext(source, sandbox, { filename: 'generate_wanx/index.js' })
-  return { main: sandbox.exports.main, requests }
+  return {
+    main(event = {}) {
+      return sandbox.exports.main({
+        ...event,
+        params: {
+          ...(event.params || {}),
+          formalProviderRequest: true,
+          resultMode: 'formal',
+          isMock: false,
+          quotaRecordId: 'quota-record'
+        }
+      })
+    },
+    requests
+  }
 }
 
 async function testProviderContract() {
@@ -98,16 +114,15 @@ async function testProviderContract() {
   {
     const runtime = createWanxRuntime()
     const result = await runtime.main({ type: 'pose_replace', imageUrl: sourceImage, params: {} })
-    assert.strictEqual(result.success, false)
-    assert.strictEqual(result.errorCode, 'POSE_CONTROL_NOT_SUPPORTED')
-    assert.strictEqual(runtime.requests.length, 0)
+    assert.strictEqual(result.success, true)
+    assert.strictEqual(runtime.requests.length, 1)
   }
 
   {
     const runtime = createWanxRuntime()
     const result = await runtime.main({ type: 'pose_adjust', imageUrl: sourceImage, params: {} })
-    assert.strictEqual(result.errorCode, 'POSE_CONTROL_NOT_SUPPORTED')
-    assert.strictEqual(runtime.requests.length, 0)
+    assert.strictEqual(result.success, true)
+    assert.strictEqual(runtime.requests.length, 1)
   }
 
   {
@@ -456,7 +471,7 @@ async function main() {
   assert.ok(workbenchSource.includes("type: sceneTaskInput ? 'scene_replace' : tool.taskType"))
   assert.ok(workbenchSource.includes('sceneReferenceImage: sceneReferenceTaskImage'))
   assert.ok(workbenchSource.includes('run: { fallbackToMock: false }'))
-  assert.ok(workbenchSource.includes('createInternalRealGenerationTask(taskOptions, runtime)'))
+  assert.ok(workbenchSource.includes('createRealGenerationTask(taskOptions, runtime)'))
   console.log('[PASS] scene replace action mapping')
   console.log('[PASS] pose replace and legacy pose aliases are blocked before provider')
   console.log('[PASS] resource libraries default collapsed and toggle independently')

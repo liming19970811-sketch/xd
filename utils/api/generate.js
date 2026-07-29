@@ -1,10 +1,6 @@
 import { initCloudBase, isCloudBaseReady } from '../cloudbase/init'
 
 const AI_GENERATE_FUNCTION_NAME = 'ai_generate'
-// DEV ONLY: keep false before real provider smoke; cloud function failures must not become fake success.
-const ENABLE_CLIENT_GENERATE_MOCK_FALLBACK = false
-// DEV ONLY: local mock image for explicitly enabled MP-WEIXIN fallback.
-const MOCK_RESULT_IMAGE_URL = 'https://dummyimage.com/900x1200/eeeeee/333333.png&text=Diebian+Mock+Result'
 
 function hasCloudCallFunction() {
   return (
@@ -208,10 +204,6 @@ export async function generateResult(payload) {
   })
 
   try {
-    // TODO(provider-cost-guard): before enabling real provider billing, call
-    // quota_guard.consumeAiPoints with a stable idempotencyKey, then pass that
-    // key through this generate payload. Never trust frontend cost values, and
-    // never let cloud function failures become local fake success.
     const cloudReady = ensureCloudReady()
     const callable = hasCloudCallFunction()
     if (!cloudReady || !callable) {
@@ -240,37 +232,6 @@ export async function generateResult(payload) {
       ...summarizeGenerateError(err),
       message: sanitizeLogText(normalizedMessage)
     })
-    if (ENABLE_CLIENT_GENERATE_MOCK_FALLBACK !== true) {
-      throw new Error(normalizedMessage)
-    }
-    // #ifdef MP-WEIXIN
-    // DEV ONLY: disabled by default. Server-side ai_generate mock/fallback remains the supported path.
-    const mockTaskId =
-      (payload && (payload.taskId || payload.task_id)) ||
-      `mock_generate_${Date.now()}`
-    const advancedPromptMeta = summarizeAdvancedPromptPayload(payload || {})
-    return normalizeGenerateResponse({
-      code: 0,
-      success: true,
-      task_id: mockTaskId,
-      taskId: mockTaskId,
-      status: 'success',
-      taskStatus: 'success',
-      result_image_url: MOCK_RESULT_IMAGE_URL,
-      resultImageUrl: MOCK_RESULT_IMAGE_URL,
-      data: {
-        task_id: mockTaskId,
-        taskId: mockTaskId,
-        status: 'success',
-        taskStatus: 'success',
-        result_image_url: MOCK_RESULT_IMAGE_URL,
-        resultImageUrl: MOCK_RESULT_IMAGE_URL,
-        image_url: MOCK_RESULT_IMAGE_URL,
-        imageUrl: MOCK_RESULT_IMAGE_URL,
-        advancedPromptMeta
-      }
-    })
-    // #endif
     throw new Error(normalizedMessage)
   }
 }

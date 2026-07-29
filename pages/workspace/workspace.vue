@@ -2337,7 +2337,7 @@
                 <view class="panel stat-panel">
                   <text class="stat-value">{{ analyticsCenter.metrics.eventCount || 0 }}</text>
                   <text class="stat-label">有效事件</text>
-                  <text class="stat-desc">已排除开发、mock和内部测试数据</text>
+                  <text class="stat-desc">仅统计正式业务数据</text>
                 </view>
                 <view class="panel stat-panel">
                   <text class="stat-value">{{ analyticsCenter.metrics.activeUsers || 0 }}</text>

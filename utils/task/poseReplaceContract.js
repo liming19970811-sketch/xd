@@ -113,11 +113,10 @@ export function buildPoseReplaceTaskPayload(input = {}) {
 
 export function getPoseProviderCapability() {
   return Object.freeze({
-    supported: false,
-    experimentalSupported: true,
+    supported: true,
     provider: 'wanx',
     model: 'qwen-image-2.0-pro',
-    errorCode: 'POSE_CONTROL_NOT_SUPPORTED',
-    message: '当前模型暂不支持可靠的姿势控制'
+    errorCode: '',
+    message: ''
   })
 }

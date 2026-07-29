@@ -2,16 +2,6 @@
   <view v-if="isGarmentTool" class="simple-page garment-replace-page">
     <AiFeatureHeader title="换衣服" description="上传人物图片，可分别替换上装、下装，或使用整套服装参考图。" />
 
-    <view v-if="garmentRuntimeConfig.isTestStage" class="runtime-test-panel">
-      <view class="runtime-test-head"><text class="runtime-test-badge">测试模式</text><text>{{ garmentRuntimeConfig.stage }}</text></view>
-      <text class="runtime-test-notice">当前为测试模式，结果仅用于功能与模型效果验证，不作为正式交付。</text>
-      <view v-if="false" class="runtime-test-modes">
-        <view :class="['runtime-test-mode', { active: garmentRuntimeConfig.executionMode === 'flow_mock' }]" @click="selectTestExecutionMode('flow_mock')">流程测试</view>
-        <view :class="['runtime-test-mode', { active: garmentRuntimeConfig.executionMode === 'model_experiment', disabled: !garmentRuntimeConfig.modelEffectTestEnabled }]" @click="selectTestExecutionMode('model_experiment', garmentRuntimeConfig)">模型效果测试</view>
-      </view>
-      <text class="runtime-test-provider">Provider：{{ garmentRuntimeConfig.provider }} · 模型：{{ garmentRuntimeConfig.model }} · {{ garmentRuntimeConfig.realProviderTest ? '真实调用，预计消耗 5 次' : '流程测试，不扣额度' }}</text>
-    </view>
-
     <view class="garment-wizard-steps">
       <view v-for="step in garmentWizardSteps" :key="step.value" class="garment-wizard-step" :class="{ active: garmentCurrentStep === step.value, done: garmentCurrentStep > step.value }">
         <text class="garment-wizard-index">{{ garmentCurrentStep > step.value ? '✓' : step.value }}</text>
@@ -284,18 +274,7 @@
   </view>
 
   <view v-else-if="isDedicatedModelTool" class="simple-page model-replace-page">
-    <view v-if="modelRuntimeConfig.isTestStage" class="runtime-test-panel">
-      <view class="runtime-test-head"><text class="runtime-test-badge">测试模式</text><text>{{ modelRuntimeConfig.stage }}</text></view>
-      <text class="runtime-test-notice">当前为测试模式，结果仅用于功能与模型效果验证，不作为正式交付。</text>
-      <view v-if="false" class="runtime-test-modes">
-        <view :class="['runtime-test-mode', { active: modelRuntimeConfig.executionMode === 'flow_mock' }]" @tap="selectTestExecutionMode('flow_mock')">流程测试</view>
-        <view :class="['runtime-test-mode', { active: modelRuntimeConfig.executionMode === 'model_experiment', disabled: !modelRuntimeConfig.modelEffectTestEnabled }]" @tap="selectTestExecutionMode('model_experiment', modelRuntimeConfig)">模型效果测试</view>
-      </view>
-      <text v-if="modelRuntimeConfig.isInternalDebug" class="runtime-test-provider">Provider：{{ modelRuntimeConfig.provider }} · 模型：{{ modelRuntimeConfig.model }} · {{ modelRuntimeConfig.realProviderTest ? '真实调用，预计消耗 5 次' : '流程测试，不扣额度' }}</text>
-      <text v-if="modelRuntimeConfig.isInternalDebug" class="runtime-test-provider">功能：AI模特 · taskType：{{ modelTaskType }} · 输入图片：{{ modelInputImageCount }} · canSubmit：{{ canStartModelReplace ? '是' : '否' }}</text>
-      <text v-if="modelRuntimeConfig.isInternalDebug && modelGenerateDisabledReason" class="runtime-test-provider">当前限制：{{ modelGenerateDisabledReason }}</text>
-      <text v-if="modelGenerationErrorSummary" class="runtime-test-error">{{ modelGenerationErrorSummary }}</text>
-    </view>
+    <text v-if="modelGenerationErrorSummary" class="generation-error-summary">{{ modelGenerationErrorSummary }}</text>
     <view v-if="clothImagePath && modelEditingStep !== 1" class="model-step-summary" @tap="editModelStep(1)">
       <image class="model-step-thumb" :src="clothImagePath" mode="aspectFill" />
       <view class="model-step-summary-copy"><text class="model-step-summary-title">1 上传原图</text><text class="model-step-summary-desc">原图已准备</text></view>
@@ -443,8 +422,8 @@
         </view>
       </view>
       <view v-else-if="modelPortraitSource === 'system'" class="model-system-empty">
-        <text>系统测试人像尚未配置</text>
-        <text>可切换到“我的常用模特”或“上传新的人像”继续调试。</text>
+        <text>系统人像尚未配置</text>
+        <text>可切换到“我的常用模特”或“上传新的人像”。</text>
       </view>
     </view>
 
@@ -484,11 +463,6 @@
   </view>
 
   <view v-else class="simple-page" :class="{ 'style-page': isStyleTool, 'color-page': isColorTool, 'fabric-page': isFabricTool, 'pattern-page': isPatternTool, 'display-page': isDisplayTool }">
-    <view v-if="genericRuntimeConfig.isTestStage" class="runtime-test-panel">
-      <view class="runtime-test-head"><text class="runtime-test-badge">真实 API 测试</text><text>{{ genericRuntimeConfig.stage }}</text></view>
-      <text class="runtime-test-notice">仅内部测试账号可提交；结果标记为实验结果，不得正式交付。</text>
-      <text class="runtime-test-provider">Provider：{{ genericRuntimeConfig.provider }} · 模型：{{ genericRuntimeConfig.model }} · 按当前功能真实扣费，失败回滚</text>
-    </view>
     <AiFeatureHeader
       :title="currentTool.title"
       :description="currentTool.description"
@@ -2324,23 +2298,18 @@ import GenerationActionBar from '../../components/ai-generation/generation-actio
 import ColorPickerCanvas from '../../components/color-picker/color-picker-canvas.vue'
 import CustomColorPicker from '../../components/color-picker/custom-color-picker.vue'
 import ColorQuickPreview from '../../components/color-picker/color-quick-preview.vue'
-import { createGenerationTaskAndRun, createInternalRealGenerationTask } from '../../utils/task/generationExecution'
-import { createTaskAndSimulate } from '../../utils/task/taskLayer'
+import { createRealGenerationTask } from '../../utils/task/generationExecution'
 import {
   getIdentityProviderCapability,
-  validateExperimentalIdentityProviderCapability,
   validateIdentityProviderCapability
 } from '../../utils/provider/identityProviderCapability'
 import {
-  validateExperimentalGarmentProviderCapability,
   validateGarmentProviderCapability
 } from '../../utils/provider/garmentProviderCapability'
 import {
-  TEST_EXECUTION_MODES,
-  buildTestTaskMetadata,
+  buildGenerationTaskMetadata,
   getRuntimeGenerationConfig,
-  refreshFeatureRuntimeBackendState,
-  setInternalRuntimeConfig
+  refreshFeatureRuntimeBackendState
 } from '../../utils/runtime/appRuntimeConfig'
 import {
   createWorkspaceGarmentDetailBatch,
@@ -2351,12 +2320,6 @@ import {
   validateGarmentDetailSelection
 } from '../../utils/task/garmentDetailContract'
 import { getMembershipUsage } from '../../utils/member/membershipRepository'
-import {
-  consumeQuota,
-  createQuotaAlphaTaskId,
-  rollbackQuota,
-  settleQuotaByTask
-} from '../../utils/quota/quotaFlow'
 import {
   GARMENT_REPLACE_ACTION,
   GARMENT_REPLACE_TASK_TYPE,
@@ -2451,30 +2414,6 @@ const GARMENT_PRESERVE_OPTIONS = Object.freeze([
   Object.freeze({ key: 'preserveBackground', label: '保留原始背景和场景', desc: '保持原场景和光线环境' }),
   Object.freeze({ key: 'preserveUnchangedGarment', label: '保留未替换的服装区域', desc: '只改变当前模式选择的服装部位' })
 ])
-
-function isSceneReplaceDevelopment() {
-  if (typeof process !== 'undefined' && process && process.env && ['development', 'dev'].includes(process.env.NODE_ENV)) return true
-  try {
-    return typeof wx !== 'undefined' && wx && typeof wx.getAccountInfoSync === 'function' && wx.getAccountInfoSync().miniProgram.envVersion === 'develop'
-  } catch (error) {
-    return false
-  }
-}
-
-function isStyleRedesignDevelopment() {
-  try {
-    if (typeof wx !== 'undefined' && wx && typeof wx.getAccountInfoSync === 'function') {
-      const accountInfo = wx.getAccountInfoSync()
-      return accountInfo && accountInfo.miniProgram && accountInfo.miniProgram.envVersion === 'develop'
-    }
-  } catch (error) {
-    return false
-  }
-  return typeof process !== 'undefined'
-    && process
-    && process.env
-    && ['development', 'dev'].includes(process.env.NODE_ENV)
-}
 
 const PRODUCT_PACKAGE_ASSET_LABELS = {
   model_image: 'AI模特图',
@@ -3358,7 +3297,7 @@ export default {
       selectedModifyTypes: ['micro_change'],
       selectedStyles: ['commute'],
       styleModificationMode: 'micro_change',
-      styleOutputCount: 2,
+      styleOutputCount: 1,
       styleCustomPrompt: '',
       aiGeneratedPrompt: '',
       styleDesignPlanName: '',
@@ -3553,7 +3492,6 @@ export default {
       return ACCESSORY_TYPES
     },
     garmentAccessoryLimit() {
-      if (this.garmentRuntimeConfig.isInternalDebug) return ACCESSORY_TYPES.length
       const garmentReferenceCount = this.garmentReplaceMode === GARMENT_REPLACE_MODES.SEPARATE ? 2 : 1
       return Math.max(0, GARMENT_PROVIDER_MAX_INPUT_IMAGES - 1 - garmentReferenceCount)
     },
@@ -3642,8 +3580,6 @@ export default {
     garmentGenerateButtonText() {
       if (this.garmentSubmissionStatus === 'submitting') return '正在创建任务...'
       if (this.garmentSubmissionStatus === 'navigation_failed' && this.garmentCreatedTaskId) return '查看已创建任务'
-      if (this.garmentRuntimeConfig.realProviderTest) return '调用真实API测试'
-      if (this.garmentRuntimeConfig.isTestStage) return '测试换衣效果'
       return '生成换衣效果'
     },
     garmentGenerationSummary() {
@@ -3701,8 +3637,7 @@ export default {
       return this.isModelTool && this.modelReplaceOnly && !this.isPureSceneReplace
     },
     replaceModeOptions() {
-      if (this.modelRuntimeConfig.isTestStage) return MODEL_REPLACE_TYPE_OPTIONS
-      return MODEL_REPLACE_TYPE_OPTIONS.filter((item) => validateIdentityProviderCapability(item.value).ok)
+      return MODEL_REPLACE_TYPE_OPTIONS
     },
     hasSelectedReplaceMode() {
       return ['head_replace', 'face_replace'].includes(this.replaceMode)
@@ -3714,7 +3649,6 @@ export default {
       return [this.clothImagePath, this.modelTargetPersonImage].filter(Boolean).length
     },
     modelPortraitSourceTabs() {
-      if (this.modelRuntimeConfig.isInternalDebug) return MODEL_PORTRAIT_SOURCE_TABS
       return MODEL_PORTRAIT_SOURCE_TABS.filter((item) => item.value !== 'system' || this.availableSystemPortraits.length > 0)
     },
     modelSystemPortraits() {
@@ -3764,11 +3698,10 @@ export default {
     garmentRuntimeConfig() {
       this.runtimeConfigRevision
       const validation = validateGarmentProviderCapability(GARMENT_REPLACE_ACTION, this.garmentReplaceMode)
-      const experimentalValidation = validateExperimentalGarmentProviderCapability(GARMENT_REPLACE_ACTION, this.garmentReplaceMode)
       const capability = validation.capability || {}
       return getRuntimeGenerationConfig({
         providerSupported: validation.ok,
-        experimentalProviderSupported: experimentalValidation.ok,
+        providerRouteSupported: validation.ok,
         provider: capability.provider || 'wanx',
         modelName: capability.modelName || 'unknown',
         taskType: GARMENT_REPLACE_ACTION
@@ -3778,7 +3711,7 @@ export default {
       this.runtimeConfigRevision
       return getRuntimeGenerationConfig({
         providerSupported: false,
-        experimentalProviderSupported: true,
+        providerRouteSupported: true,
         provider: 'wanx',
         modelName: 'qwen-image-2.0-pro',
         taskType: (this.currentToolConfig && this.currentToolConfig.taskType) || this.toolType
@@ -3787,11 +3720,10 @@ export default {
     modelRuntimeConfig() {
       this.runtimeConfigRevision
       const validation = validateIdentityProviderCapability(this.replaceMode)
-      const experimentalValidation = validateExperimentalIdentityProviderCapability(this.replaceMode)
       const capability = validation.capability || this.modelIdentityProviderCapability || {}
       return getRuntimeGenerationConfig({
         providerSupported: validation.ok,
-        experimentalProviderSupported: experimentalValidation.ok,
+        providerRouteSupported: validation.ok,
         provider: capability.provider || 'wanx',
         modelName: capability.modelName || 'unknown',
         taskType: this.modelTaskType
@@ -3801,7 +3733,6 @@ export default {
       return this.modelRuntimeConfig.canSubmit
     },
     modelIdentityAnyCapabilityAvailable() {
-      if (this.modelRuntimeConfig.isTestStage) return true
       return MODEL_REPLACE_TYPE_OPTIONS.some((item) => validateIdentityProviderCapability(item.value).ok)
     },
     modelReplaceTargetLabel() {
@@ -3821,8 +3752,6 @@ export default {
     },
     modelReplaceButtonText() {
       if (this.isGenerating) return '生成中...'
-      if (this.modelRuntimeConfig.realProviderTest) return '调用真实API测试'
-      if (this.modelRuntimeConfig.isTestStage) return '开始测试生成'
       return this.replaceMode === 'face_replace' ? '开始只换脸' : '开始换整头'
     },
     isMarketingTool() {
@@ -3862,9 +3791,7 @@ export default {
       return STYLE_MODIFICATION_MODES
     },
     styleOutputCountOptions() {
-      return this.genericRuntimeConfig.isInternalDebug
-        ? STYLE_OUTPUT_COUNT_OPTIONS
-        : STYLE_OUTPUT_COUNT_OPTIONS.filter((count) => count !== 1)
+      return STYLE_OUTPUT_COUNT_OPTIONS
     },
     styleWizardSteps() {
       return STYLE_WIZARD_STEPS
@@ -4615,7 +4542,6 @@ export default {
     } else {
       this.toolType = TOOL_CONFIGS[incomingToolType] ? incomingToolType : 'model'
     }
-    if (this.isStyleTool && this.genericRuntimeConfig.isInternalDebug) this.styleOutputCount = 1
     if (this.isGarmentTool) {
       uni.setNavigationBarTitle({ title: 'AI换衣服' })
     } else if (this.isPureSceneReplace) {
@@ -5039,10 +4965,9 @@ export default {
         return
       }
       const runtime = this.garmentRuntimeConfig
-      const capability = validateGarmentProviderCapability(GARMENT_REPLACE_ACTION, validation.input.replaceMode)
-      const experimentalCapability = validateExperimentalGarmentProviderCapability(GARMENT_REPLACE_ACTION, validation.input.replaceMode)
-      if (!runtime.canSubmit || (!runtime.usesMock && !runtime.realProviderTest && !capability.ok) || (runtime.realProviderTest && !experimentalCapability.ok)) {
-        this.garmentSubmissionError = runtime.disabledReason || (runtime.realProviderTest ? experimentalCapability.message : capability.message) || '当前运行环境未开放换衣服任务。'
+      const providerCapability = validateGarmentProviderCapability(GARMENT_REPLACE_ACTION, validation.input.replaceMode)
+      if (!runtime.canSubmit || !providerCapability.ok) {
+        this.garmentSubmissionError = runtime.disabledReason || providerCapability.message || '当前换衣任务没有可用的真实 Provider 路由。'
         uni.showToast({ title: this.garmentSubmissionError, icon: 'none' })
         return
       }
@@ -5051,15 +4976,9 @@ export default {
       this.garmentSubmissionError = ''
       this.garmentCreatedTaskId = ''
       this.isGenerating = true
-      let quotaRecordId = ''
       try {
         const normalized = validation.input
-        const testMetadata = buildTestTaskMetadata(runtime)
-        const clientTaskId = runtime.realProviderTest ? createQuotaAlphaTaskId() : ''
-        const quota = runtime.realProviderTest
-          ? await consumeQuota({ taskId: clientTaskId, action: GARMENT_REPLACE_TASK_TYPE, count: 1 })
-          : null
-        quotaRecordId = quota ? quota.quotaRecordId : ''
+        const generationMetadata = buildGenerationTaskMetadata(runtime)
         const params = {
           actionType: GARMENT_REPLACE_ACTION,
           taskType: GARMENT_REPLACE_TASK_TYPE,
@@ -5090,22 +5009,14 @@ export default {
           planId: 'garment_replace',
           planName: 'AI换衣服',
           outputUsage: '换装效果图',
-          ...(clientTaskId ? { idempotencyKey: clientTaskId } : {}),
-          ...(quota ? {
-            quotaRecordId: quota.quotaRecordId,
-            quotaRecordStatus: quota.quotaRecordStatus,
-            quotaIdempotencyKey: quota.idempotencyKey,
-            estimatedCost: quota.cost
-          } : {}),
-          ...testMetadata
+          ...generationMetadata
         }
         const taskOptions = {
-          ...(clientTaskId ? { taskId: clientTaskId, clientTaskId } : {}),
           type: GARMENT_REPLACE_TASK_TYPE,
           taskType: GARMENT_REPLACE_TASK_TYPE,
           channel: 'simple_ai_workbench',
-          provider: testMetadata.provider,
-          mock: testMetadata.isMock,
+          provider: generationMetadata.provider,
+          mock: false,
           run: { fallbackToMock: false },
           input: {
             imageUrl: normalized.personImage,
@@ -5147,45 +5058,23 @@ export default {
               preserveGarmentDetails: true,
               preserveUnchangedGarment: normalized.preserveUnchangedGarment,
               previewOnly: false,
-              reviewStatus: runtime.isTestStage ? 'needs_review' : '',
-              deliveryEligible: testMetadata.deliveryEligible
+              reviewStatus: '',
+              deliveryEligible: true
             }
           },
           params
         }
-        const task = runtime.usesMock
-          ? createTaskAndSimulate({ ...taskOptions, simulate: { delay: 900 } })
-          : createGenerationTaskAndRun(taskOptions)
+        const task = await createRealGenerationTask(taskOptions, runtime)
         if (!task || !task.taskId) throw new Error('TASK_CREATE_INVALID')
-        if (quotaRecordId) settleQuotaByTask({ taskId: task.taskId, quotaRecordId })
         this.garmentCreatedTaskId = task.taskId
         this.garmentSubmissionStatus = 'task_created'
         normalized.accessoryReferences.forEach((item) => markAccessoryUsed(item.accessoryId))
         this.clearGarmentDraft()
-        if (isSceneReplaceDevelopment()) {
-          console.info('[garment-replace:task]', {
-            actionType: GARMENT_REPLACE_ACTION,
-            replaceMode: normalized.replaceMode,
-            hasPersonImage: true,
-            hasUpperGarment: Boolean(normalized.upperGarment),
-            hasLowerGarment: Boolean(normalized.lowerGarment),
-            hasOutfitGarment: Boolean(normalized.outfitGarment),
-            accessoryReferenceCount: normalized.accessoryReferences.length,
-            environment: runtime.stage,
-            provider: testMetadata.provider,
-            capabilityStatus: runtime.capabilityStatus,
-            isMock: testMetadata.isMock,
-            success: true,
-            errorCode: ''
-          })
-        }
         this.navigateToGarmentTask(task.taskId)
       } catch (error) {
-        if (quotaRecordId) {
-          try { await rollbackQuota(quotaRecordId, 'garment_task_create_failed') } catch (rollbackError) {}
-        }
         this.garmentSubmissionStatus = 'failed'
-        this.garmentSubmissionError = '换衣服任务创建失败，请保留当前图片后重试。'
+        const code = String((error && (error.code || error.errorCode)) || '')
+        this.garmentSubmissionError = `${code ? `${code}：` : ''}${(error && error.message) || '换衣服任务创建失败，请保留当前图片后重试。'}`
         uni.showToast({ title: this.garmentSubmissionError, icon: 'none' })
       } finally {
         this.isGenerating = false
@@ -5406,33 +5295,10 @@ export default {
       this.saveModelReplacePreference()
       this.modelGenerationErrorSummary = ''
       this.modelEditingStep = 3
-      if (String(this.modelRuntimeConfig.stage || '') === 'development') {
-        this.$nextTick(() => {
-          console.info('[ai-model:replace-mode-selected]', {
-            replaceMode: this.replaceMode,
-            taskType: this.modelTaskType,
-            canSubmit: this.canStartModelReplace,
-            disabledReason: this.modelGenerateDisabledReason
-          })
-        })
-      }
-    },
-    selectTestExecutionMode(mode = TEST_EXECUTION_MODES.FLOW_MOCK, runtime = null) {
-      const activeRuntime = runtime || this.modelRuntimeConfig
-      if (mode === TEST_EXECUTION_MODES.MODEL_EXPERIMENT && !activeRuntime.modelEffectTestEnabled) {
-        uni.showToast({ title: '当前 Provider 未开放模型效果测试', icon: 'none' })
-        return
-      }
-      const result = setInternalRuntimeConfig({ executionMode: mode })
-      if (!result.ok) {
-        uni.showToast({ title: '仅内部测试账号可切换测试方式', icon: 'none' })
-        return
-      }
-      this.runtimeConfigRevision += 1
     },
     selectModelPortraitSource(value = 'profiles') {
       if (!['profiles', 'upload', 'system'].includes(value)) return
-      if (value === 'system' && !this.availableSystemPortraits.length && !this.modelRuntimeConfig.isInternalDebug) return
+      if (value === 'system' && !this.availableSystemPortraits.length) return
       this.modelPortraitSource = value
       this.modelTargetConfirmed = false
       this.modelEditingStep = 3
@@ -5566,7 +5432,7 @@ export default {
         const restoredOutputCount = Number(contextParams.outputCount || contextParams.styleOutputCount || contextParams.count)
         this.styleOutputCount = STYLE_OUTPUT_COUNT_OPTIONS.includes(restoredOutputCount)
           ? restoredOutputCount
-          : (this.genericRuntimeConfig.isInternalDebug ? 1 : 2)
+          : 1
         const referenceImages = Array.isArray(contextParams.referenceImages) ? contextParams.referenceImages : []
         this.styleReferenceImagePath = contextParams.styleReferenceImage || referenceImages[0] || this.styleReferenceImagePath
         this.applyStyleParams()
@@ -6491,7 +6357,7 @@ export default {
       this.applyFabricParams()
     },
     selectFabricTargetArea(area) {
-      if (area === 'partial' && !this.genericRuntimeConfig.isInternalDebug) {
+      if (area === 'partial') {
         uni.showToast({ title: '精确局部换面料需要蒙版能力，当前暂不支持', icon: 'none' })
         return
       }
@@ -6892,15 +6758,7 @@ export default {
       }
     },
     trackStyleRedesignEvent(eventName = '', payload = {}) {
-      if (!isStyleRedesignDevelopment()) return
-      console.log('[style-redesign:event]', {
-        event: String(eventName || ''),
-        status: String(payload.status || ''),
-        errorCode: String(payload.errorCode || ''),
-        selectedStyleCount: Number(payload.selectedStyleCount || 0),
-        outputCount: Number(payload.outputCount || 0),
-        durationMs: Number(payload.durationMs || 0)
-      })
+      return { eventName, payload }
     },
     initializeStyleDraft(query = {}) {
       this.styleDraftReady = true
@@ -7054,7 +6912,7 @@ export default {
       this.aiGeneratedPrompt = String(draft.aiGeneratedPrompt || '')
       this.styleOutputCount = STYLE_OUTPUT_COUNT_OPTIONS.includes(Number(draft.styleOutputCount))
         ? Number(draft.styleOutputCount)
-        : (this.genericRuntimeConfig.isInternalDebug ? 1 : 2)
+        : 1
       this.styleDesignPlanName = String(draft.styleDesignPlanName || '')
       this.styleSavePanelOpen = Boolean(this.styleDesignPlanName)
       this.selectedParams = {
@@ -7097,7 +6955,7 @@ export default {
       this.selectedStyles = ['commute']
       this.styleCustomPrompt = ''
       this.aiGeneratedPrompt = ''
-      this.styleOutputCount = this.genericRuntimeConfig.isInternalDebug ? 1 : 2
+      this.styleOutputCount = 1
       this.styleDesignPlanName = ''
       this.styleSavePanelOpen = false
       this.styleDraftAvailable = false
@@ -7772,7 +7630,7 @@ export default {
       const normalizedCount = Number(count)
       this.styleOutputCount = STYLE_OUTPUT_COUNT_OPTIONS.includes(normalizedCount)
         ? normalizedCount
-        : (this.genericRuntimeConfig.isInternalDebug ? 1 : 2)
+        : 1
       this.applyStyleParams()
     },
     chooseStyleReferenceImage() {
@@ -8899,10 +8757,9 @@ export default {
       if (this.isGenerating) return
       this.modelGenerationErrorSummary = ''
       const runtime = this.modelRuntimeConfig
-      const capabilityValidation = validateIdentityProviderCapability(this.replaceMode)
-      const experimentalValidation = validateExperimentalIdentityProviderCapability(this.replaceMode)
-      if (!runtime.canSubmit || (!runtime.usesMock && !runtime.realProviderTest && !capabilityValidation.ok) || (runtime.realProviderTest && !experimentalValidation.ok)) {
-        uni.showToast({ title: runtime.disabledReason || (runtime.realProviderTest ? experimentalValidation.message : capabilityValidation.message) || '当前运行环境未开放人物替换任务', icon: 'none' })
+      const providerValidation = validateIdentityProviderCapability(this.replaceMode)
+      if (!runtime.canSubmit || !providerValidation.ok) {
+        uni.showToast({ title: runtime.disabledReason || providerValidation.message || '当前人物替换任务没有可用的真实 Provider 路由', icon: 'none' })
         return
       }
       if (!this.clothImagePath) {
@@ -8919,7 +8776,6 @@ export default {
       }
 
       this.isGenerating = true
-      let quotaRecordId = ''
       try {
         const savedProfile = await this.saveUploadedModelProfileIfNeeded()
         const actionType = this.modelTaskType
@@ -8940,12 +8796,7 @@ export default {
         } catch (error) {
           sourceImageInfo = null
         }
-        const testMetadata = buildTestTaskMetadata(runtime)
-        const clientTaskId = runtime.realProviderTest ? createQuotaAlphaTaskId() : ''
-        const quota = runtime.realProviderTest
-          ? await consumeQuota({ taskId: clientTaskId, action: actionType, count: 1 })
-          : null
-        quotaRecordId = quota ? quota.quotaRecordId : ''
+        const generationMetadata = buildGenerationTaskMetadata(runtime)
         const replaceParams = {
           actionType,
           taskType: actionType,
@@ -8971,21 +8822,13 @@ export default {
           sceneType: 'original',
           sourceWidth: Number((sourceImageInfo && sourceImageInfo.width) || 0),
           sourceHeight: Number((sourceImageInfo && sourceImageInfo.height) || 0),
-          ...(clientTaskId ? { idempotencyKey: clientTaskId } : {}),
-          ...(quota ? {
-            quotaRecordId: quota.quotaRecordId,
-            quotaRecordStatus: quota.quotaRecordStatus,
-            quotaIdempotencyKey: quota.idempotencyKey,
-            estimatedCost: quota.cost
-          } : {}),
-          ...testMetadata
+          ...generationMetadata
         }
         const taskOptions = {
-          ...(clientTaskId ? { taskId: clientTaskId, clientTaskId } : {}),
           type: actionType,
           channel: 'simple_ai_workbench',
-          provider: testMetadata.provider,
-          mock: testMetadata.isMock,
+          provider: generationMetadata.provider,
+          mock: false,
           input: {
             imageUrl: sourceImage,
             image_url: sourceImage,
@@ -8999,8 +8842,8 @@ export default {
             params: replaceParams,
             options: {
               outputType: actionType === 'head_replace' ? 'head_replace_image' : 'face_replace_image',
-              reviewStatus: 'needs_review',
-              deliveryEligible: testMetadata.deliveryEligible,
+              reviewStatus: '',
+              deliveryEligible: true,
               previewOnly: false
             }
           },
@@ -9009,23 +8852,7 @@ export default {
             fallbackToMock: false
           }
         }
-        const task = runtime.usesMock
-          ? createTaskAndSimulate({ ...taskOptions, simulate: { delay: 900 } })
-          : createGenerationTaskAndRun(taskOptions)
-        if (quotaRecordId) settleQuotaByTask({ taskId: task.taskId, quotaRecordId })
-
-        if (runtime.isTestStage) {
-          console.info('[model-replace:test-task]', {
-            actionType,
-            environment: runtime.stage,
-            provider: testMetadata.provider,
-            capabilityStatus: runtime.capabilityStatus,
-            isMock: testMetadata.isMock,
-            inputImageCount: 2,
-            hasBaseImage: true,
-            hasIdentityReferenceImage: true
-          })
-        }
+        const task = await createRealGenerationTask(taskOptions, runtime)
 
         if (this.isStyleTool) {
           try {
@@ -9043,9 +8870,6 @@ export default {
           url: `/package-ai/result/result?taskId=${encodeURIComponent(task.taskId)}`
         })
       } catch (error) {
-        if (quotaRecordId) {
-          try { await rollbackQuota(quotaRecordId, 'identity_task_create_failed') } catch (rollbackError) {}
-        }
         const errorCode = String((error && (error.code || error.errorCode || error.message)) || '')
         const safeErrorMessages = {
           QUOTA_CLOUD_UNAVAILABLE: 'quota_failed：额度服务暂不可用',
@@ -9061,7 +8885,7 @@ export default {
             ? (error && error.message) || '请完善常用模特保存信息'
           : ['HEAD_REFERENCE_NOT_SUPPORTED', 'IDENTITY_PROVIDER_NOT_SUPPORTED'].includes(errorCode)
             ? '当前模型暂不支持高一致性头部更换'
-            : (safeErrorMessages[errorCode] || `${errorCode || 'request_failed'}：生成请求未创建，请检查测试配置或额度状态`)
+            : (safeErrorMessages[errorCode] || `${errorCode || 'request_failed'}：${(error && error.message) || '生成请求未创建，请检查正式 API 配置或额度状态'}`)
         this.modelGenerationErrorSummary = message
         uni.showToast({ title: message, icon: 'none' })
       } finally {
@@ -9100,8 +8924,8 @@ export default {
         return
       }
       const runtime = this.genericRuntimeConfig
-      if (!runtime.canSubmit || !runtime.realProviderTest) {
-        uni.showToast({ title: runtime.disabledReason || (runtime.canManageTesting ? '当前真实 Provider 测试配置未就绪' : '仅内部测试账号可调用真实 API'), icon: 'none' })
+      if (!runtime.canSubmit) {
+        uni.showToast({ title: runtime.disabledReason || '正式 API 配置尚未就绪', icon: 'none' })
         return
       }
       if (!this.clothImagePath) {
@@ -9223,19 +9047,8 @@ export default {
             hasSceneReferenceImage: Boolean(sceneReferenceTaskImage),
             ...sceneReplaceOptions
           }
-          if (isSceneReplaceDevelopment()) {
-            console.log('[scene-replace:task]', {
-              actionType: 'scene_replace',
-              sceneSource: sceneTaskInput.sceneSource,
-              hasSourceImage: true,
-              hasSceneReferenceImage: Boolean(sceneReferenceTaskImage),
-              hasSceneTemplateId: Boolean(sceneTaskInput.sceneTemplateId),
-              success: true,
-              errorCode: '',
-              durationMs: Date.now() - generationStartedAt
-            })
-          }
         }
+        const generationMetadata = buildGenerationTaskMetadata(runtime)
         const taskOptions = {
           type: sceneTaskInput ? 'scene_replace' : tool.taskType,
           channel: 'simple_ai_workbench',
@@ -9307,6 +9120,7 @@ export default {
               } : {})
             },
             params: {
+              ...generationMetadata,
               toolType: this.toolType,
               ...(this.isModelTool ? {
                 modelWorkflow: this.modelReplacementMode,
@@ -9424,6 +9238,7 @@ export default {
             }
           },
           params: {
+            ...generationMetadata,
             toolType: this.toolType,
             templateType: tool.taskType,
             outputType: tool.outputType,
@@ -9490,15 +9305,7 @@ export default {
           }
         }
         let task = null
-        if (this.isStyleTool && Number(this.styleOutputCount) !== 1) {
-          throw Object.assign(new Error('内部真实测试每次仅允许生成一个方案'), { code: 'REAL_TEST_SINGLE_OUTPUT_REQUIRED' })
-        }
-        if (this.isDetailDisplayTool && this.selectedDetailReferenceItems.length !== 1) {
-          throw Object.assign(new Error('内部真实测试每次仅允许选择一个细节'), { code: 'REAL_TEST_SINGLE_OUTPUT_REQUIRED' })
-        }
-        if (runtime.realProviderTest) {
-          task = await createInternalRealGenerationTask(taskOptions, runtime)
-        } else if (this.isDetailDisplayTool) {
+        if (this.isDetailDisplayTool) {
           const production = createWorkspaceGarmentDetailBatch({
             selectedDetails: this.selectedDetailReferenceItems,
             detailReferences: this.detailReferenceImages,
@@ -9526,7 +9333,7 @@ export default {
           this.styleCreatedBatchId = production.batch.batchId
           this.styleCreatedHistoryId = production.history.historyId
         } else {
-          task = createGenerationTaskAndRun(taskOptions)
+          task = await createRealGenerationTask(taskOptions, runtime)
         }
 
         if (!task || !task.taskId) {
@@ -9707,31 +9514,7 @@ export default {
 </script>
 
 <style scoped>
-.runtime-test-panel {
-  margin: 20rpx 24rpx 0;
-  padding: 18rpx 20rpx;
-  border: 1rpx solid #c7d2fe;
-  border-radius: 18rpx;
-  background: #eef2ff;
-  color: #3730a3;
-}
-
-.runtime-test-head,
-.runtime-test-modes {
-  display: flex;
-  align-items: center;
-  gap: 12rpx;
-}
-
-.runtime-test-head { justify-content: space-between; font-size: 22rpx; }
-.runtime-test-badge { padding: 6rpx 12rpx; border-radius: 999rpx; background: #4f46e5; color: #fff; font-weight: 700; }
-.runtime-test-notice { display: block; margin-top: 12rpx; color: #475569; font-size: 23rpx; line-height: 1.55; }
-.runtime-test-modes { margin-top: 14rpx; }
-.runtime-test-mode { flex: 1; min-height: 64rpx; border: 1rpx solid #c7d2fe; border-radius: 12rpx; background: #fff; color: #4338ca; font-size: 24rpx; line-height: 64rpx; text-align: center; }
-.runtime-test-mode.active { border-color: #4f46e5; background: #4f46e5; color: #fff; font-weight: 700; }
-.runtime-test-mode.disabled { opacity: .48; }
-.runtime-test-provider { display: block; margin-top: 12rpx; color: #64748b; font-size: 21rpx; }
-.runtime-test-error { display: block; margin-top: 10rpx; color: #b42318; font-size: 22rpx; line-height: 1.5; overflow-wrap: anywhere; }
+.generation-error-summary { display: block; margin: 0 24rpx 10rpx; color: #b42318; font-size: 22rpx; line-height: 1.5; overflow-wrap: anywhere; }
 .simple-page {
   min-height: 100vh;
   padding: 24rpx 24rpx 160rpx;

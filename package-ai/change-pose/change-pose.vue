@@ -89,24 +89,20 @@
         <view class="summary-row"><text>姿势来源</text><text>{{ poseSourceLabel }}</text></view>
         <view class="summary-row"><text>目标姿势</text><text>{{ poseTargetLabel }}</text></view>
         <view class="summary-row"><text>保留内容</text><text>人物、服装、背景、比例</text></view>
-        <view class="provider-warning" v-if="!poseRuntimeConfig.realProviderTest">
-          <text class="provider-warning-title">UI 可测试</text>
-          <text>{{ poseRuntimeConfig.disabledReason || providerCapability.message }}。未进入真实 Provider 前不会创建任务或扣除额度。</text>
-        </view>
       </view>
     </view>
 
     <view class="bottom-bar">
       <view v-if="currentStep > 1" class="secondary-button" @click="previousStep">上一步</view>
       <button v-if="currentStep < 4" class="primary-button" :disabled="!canContinue" @click="nextStep">下一步</button>
-      <button v-else class="primary-button" :disabled="isSubmitting" @click="submitPoseTask">生成换姿势效果</button>
+      <button v-else class="primary-button" :disabled="isSubmitting || !poseRuntimeConfig.canSubmit" @click="submitPoseTask">生成换姿势效果</button>
     </view>
   </view>
 </template>
 
 <script>
 import { uploadImage } from '../../utils/api/upload'
-import { createInternalRealGenerationTask } from '../../utils/task/generationExecution'
+import { createRealGenerationTask } from '../../utils/task/generationExecution'
 import { getRuntimeGenerationConfig, refreshFeatureRuntimeBackendState } from '../../utils/runtime/appRuntimeConfig'
 import {
   POSE_PRESETS,
@@ -149,7 +145,7 @@ export default {
       this.runtimeConfigRevision
       return getRuntimeGenerationConfig({
         providerSupported: this.providerCapability.supported === true,
-        experimentalProviderSupported: this.providerCapability.experimentalSupported === true,
+        providerRouteSupported: this.providerCapability.supported === true,
         provider: this.providerCapability.provider,
         modelName: this.providerCapability.model,
         taskType: 'pose_replace'
@@ -261,21 +257,22 @@ export default {
         uni.showToast({ title: payload.message, icon: 'none' })
         return
       }
-      if (!this.poseRuntimeConfig.realProviderTest) {
+      if (!this.poseRuntimeConfig.canSubmit) {
         uni.showModal({
-          title: '真实任务尚不可提交',
-          content: `${this.poseRuntimeConfig.disabledReason || this.providerCapability.message}。本次不会创建任务或扣除额度。`,
+          title: '暂时无法生成',
+          content: this.poseRuntimeConfig.disabledReason || this.providerCapability.message,
           showCancel: false
         })
         return
       }
       this.isSubmitting = true
       try {
-        const task = await createInternalRealGenerationTask(payload, this.poseRuntimeConfig)
+        const task = await createRealGenerationTask(payload, this.poseRuntimeConfig)
         this.saveDraft()
         uni.navigateTo({ url: `/package-ai/result/result?taskId=${encodeURIComponent(task.taskId)}` })
       } catch (error) {
-        uni.showToast({ title: (error && error.message) || '真实 API 测试提交失败', icon: 'none' })
+        const code = String((error && (error.code || error.errorCode)) || '')
+        uni.showToast({ title: `${code ? `${code}：` : ''}${(error && error.message) || '生成任务提交失败'}`, icon: 'none' })
       } finally {
         this.isSubmitting = false
       }

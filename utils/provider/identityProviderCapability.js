@@ -1,12 +1,13 @@
 const CURRENT_IDENTITY_PROVIDER_MODEL = 'qwen-image-2.0-pro'
 
 const CURRENT_IDENTITY_PROVIDER_CAPABILITY = Object.freeze({
+  provider: 'wanx',
   modelName: CURRENT_IDENTITY_PROVIDER_MODEL,
-  supportsIdentityReference: false,
+  supportsIdentityReference: true,
   supportsMultipleImages: true,
-  supportsFaceSwap: false,
-  supportsHeadReplace: false,
-  supportsMaskEdit: false,
+  supportsFaceSwap: true,
+  supportsHeadReplace: true,
+  supportsMaskEdit: true,
   maxReferenceImages: 2
 })
 
@@ -18,19 +19,6 @@ export function isIdentityReplaceAction(value = '') {
 
 export function getIdentityProviderCapability() {
   return { ...CURRENT_IDENTITY_PROVIDER_CAPABILITY }
-}
-
-export function validateExperimentalIdentityProviderCapability(actionType = '') {
-  const normalizedAction = String(actionType || '').trim().toLowerCase()
-  if (!isIdentityReplaceAction(normalizedAction)) return { ok: true, capability: getIdentityProviderCapability() }
-  const capability = getIdentityProviderCapability()
-  const ok = capability.supportsMultipleImages && capability.maxReferenceImages >= 1
-  return {
-    ok,
-    capability,
-    errorCode: ok ? '' : 'PROVIDER_CAPABILITY_MISMATCH',
-    message: ok ? '' : '当前 Provider 不支持人物原图与身份参考图的双图实验请求'
-  }
 }
 
 export function validateIdentityProviderCapability(actionType = '') {
@@ -50,7 +38,7 @@ export function validateIdentityProviderCapability(actionType = '') {
     ok,
     capability,
     errorCode: ok ? '' : 'IDENTITY_PROVIDER_NOT_SUPPORTED',
-    message: ok ? '' : '当前模型暂不支持高一致性人物替换'
+    message: ok ? '' : '当前模型没有可用的人物替换真实路由'
   }
 }
 

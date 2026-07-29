@@ -100,7 +100,7 @@ export const HOME_MORE_CAPABILITIES = Object.freeze([
   freezeCapability({ id: 'batch_model', name: '批量模特图', description: '一次处理多款素材', icon: '批量', route: UPLOAD_ROUTE, query: { entryScene: 'batch_model', autoPromptPlan: '1' }, taskType: 'batch_model', tone: 'green' })
 ])
 
-export const INTERNAL_DEBUG_CAPABILITIES = Object.freeze([
+export const PRODUCTION_ADVANCED_CAPABILITIES = Object.freeze([
   freezeCapability({ id: 'ai_production_center', name: 'AI服装生产中心', description: '按生产方案创建独立交付任务', icon: '生产', route: '/package-ai/production-guide/production-guide', taskType: 'ai_production_plan', tone: 'purple' }),
   freezeCapability({ id: 'ecommerce_main', name: '商品主图', description: '电商商品主图调试', icon: '主图', route: UPLOAD_ROUTE, query: { entryScene: 'ecommerce_main', autoPromptPlan: '1' }, taskType: 'ecommerce_main', tone: 'blue' }),
   freezeCapability({ id: 'cross_border_white', name: '跨境白底图', description: '跨境渠道白底素材调试', icon: '白底', route: UPLOAD_ROUTE, query: { entryScene: 'cross_border_white', autoPromptPlan: '1' }, taskType: 'cross_border_white', tone: 'slate' }),

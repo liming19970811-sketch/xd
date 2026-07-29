@@ -1,12 +1,11 @@
-const SUPPORTED_PROVIDERS = new Set(['mock', 'real'])
-const DEFAULT_PROVIDER = 'mock'
+const DEFAULT_PROVIDER = 'real'
 const DEFAULT_TIMEOUT_MS = 65000
 const DEFAULT_RETRY_TIMES = 0
 const DEFAULT_RETRY_BASE_DELAY_MS = 500
 const DEFAULT_POLL_INTERVAL_MS = 2500
 const DEFAULT_POLL_MAX_ATTEMPTS = 20
 const DEFAULT_MODEL = 'flux.1-dev'
-const DEFAULT_FABRIC_REPLACE_PROVIDER = 'mock'
+const DEFAULT_FABRIC_REPLACE_PROVIDER = 'real'
 const DEFAULT_FABRIC_REPLACE_MODEL = 'wanx-image-edit'
 const DEFAULT_FABRIC_REPLACE_TIMEOUT_MS = 65000
 const MAX_SAFE_RETRY_TIMES = 1
@@ -28,7 +27,7 @@ function getAiProvider(env = process.env) {
     .trim()
     .toLowerCase()
 
-  if (SUPPORTED_PROVIDERS.has(provider)) {
+  if (provider === 'real') {
     return provider
   }
 
@@ -40,7 +39,7 @@ function getFabricReplaceProvider(env = process.env) {
     .trim()
     .toLowerCase()
 
-  if (SUPPORTED_PROVIDERS.has(provider)) {
+  if (provider === 'real') {
     return provider
   }
 
@@ -67,8 +66,10 @@ function getAiConfig(env = process.env) {
     env && env.FABRIC_REPLACE_TIMEOUT_MS,
     DEFAULT_FABRIC_REPLACE_TIMEOUT_MS
   )
-  const enableRealProviderCall = isExplicitTrue(env && env.ENABLE_REAL_PROVIDER_CALL)
-  const disableMockFallback = isExplicitTrue(env && env.DISABLE_MOCK_FALLBACK)
+  const enableRealProviderCall = !env || env.ENABLE_REAL_PROVIDER_CALL === undefined
+    ? true
+    : isExplicitTrue(env.ENABLE_REAL_PROVIDER_CALL)
+  const disableMockFallback = true
 
   return {
     provider,

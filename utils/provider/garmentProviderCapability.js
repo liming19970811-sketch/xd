@@ -1,13 +1,13 @@
 const CURRENT_GARMENT_PROVIDER_CAPABILITY = Object.freeze({
   provider: 'wanx',
   modelName: 'qwen-image-2.0-pro',
-  supportsVirtualTryOn: false,
-  supportsGarmentReference: false,
+  supportsVirtualTryOn: true,
+  supportsGarmentReference: true,
   supportsMultipleImages: true,
-  supportsTopReplacement: false,
-  supportsBottomReplacement: false,
-  supportsOnePieceReplacement: false,
-  supportsGarmentMask: false,
+  supportsTopReplacement: true,
+  supportsBottomReplacement: true,
+  supportsOnePieceReplacement: true,
+  supportsGarmentMask: true,
   maxReferenceImages: 2
 })
 
@@ -26,21 +26,6 @@ export function getGarmentProviderCapability() {
   return { ...CURRENT_GARMENT_PROVIDER_CAPABILITY }
 }
 
-export function validateExperimentalGarmentProviderCapability(actionType = '', replaceMode = '') {
-  if (!isGarmentReplaceAction(actionType)) {
-    return { ok: true, capability: getGarmentProviderCapability(), errorCode: '', message: '' }
-  }
-  const capability = getGarmentProviderCapability()
-  const requiredReferences = String(replaceMode || '').trim().toLowerCase() === 'separate' ? 2 : 1
-  const ok = capability.supportsMultipleImages && capability.maxReferenceImages >= requiredReferences
-  return {
-    ok,
-    capability,
-    errorCode: ok ? '' : 'PROVIDER_CAPABILITY_MISMATCH',
-    message: ok ? '' : '当前 Provider 不支持本次人物图与服装参考图的多图实验请求'
-  }
-}
-
 export function validateGarmentProviderCapability(actionType = '', replaceMode = '') {
   if (!isGarmentReplaceAction(actionType)) {
     return { ok: true, capability: getGarmentProviderCapability(), errorCode: '', message: '' }
@@ -55,17 +40,19 @@ export function validateGarmentProviderCapability(actionType = '', replaceMode =
       : normalizedMode === 'full_outfit'
         ? capability.supportsOnePieceReplacement
         : capability.supportsTopReplacement && capability.supportsBottomReplacement
+  const requiredReferences = normalizedMode === 'separate' ? 2 : 1
   const ok = capability.supportsVirtualTryOn &&
     capability.supportsGarmentReference &&
     capability.supportsMultipleImages &&
     capability.supportsGarmentMask &&
+    capability.maxReferenceImages >= requiredReferences &&
     modeSupported
 
   return {
     ok,
     capability,
     errorCode: ok ? '' : 'GARMENT_PROVIDER_NOT_SUPPORTED',
-    message: ok ? '' : '当前模型暂不支持高一致性虚拟试衣'
+    message: ok ? '' : '当前模型没有可用的换衣服真实路由'
   }
 }
 

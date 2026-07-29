@@ -11,8 +11,7 @@ import {
   isPatternStructureTask
 } from './patternStructureContract'
 import { upsertWorkRecordFromTask } from '../work/workRecordRepository'
-import { assertIdentityProviderCapability } from '../provider/identityProviderCapability'
-import { assertGarmentProviderCapability } from '../provider/garmentProviderCapability'
+import { consumeQuota, settleQuotaByTask } from '../quota/quotaFlow'
 import {
   GENERATION_STATUSES,
   normalizeGenerationStatus,
@@ -730,21 +729,6 @@ function buildWanxFailurePatch(task, error) {
   }
 }
 
-function fallbackToLocalMock(task, error) {
-  console.warn('[taskLayer:wanx] cloud call failed, fallback to local mock', {
-    taskId: task && task.taskId,
-    type: task && (task.type || task.taskType),
-    errorCode: (error && (error.errorCode || error.code)) || 'WANX_CALL_FAILED'
-  })
-  patchTask(task.taskId, {
-    ...buildWanxFailurePatch(task, error),
-    fallbackReason: (error && error.message) || 'Wanx call failed'
-  })
-  return simulateTask(task.taskId, {
-    delay: 600
-  })
-}
-
 export async function runWanxTask(task, options = {}) {
   const sourceTask = typeof task === 'string' ? getTask(task) : task
   if (!sourceTask || !sourceTask.taskId) {
@@ -767,18 +751,12 @@ export async function runWanxTask(task, options = {}) {
   })
 
   if (!hasCloudCallFunction() || !ensureCloudReady()) {
-    if (options.fallbackToMock === false) {
-      const failedTask = patchTask(taskId, buildWanxFailurePatch(sourceTask, {
-        errorCode: 'WX_CLOUD_UNAVAILABLE',
-        message: 'wx.cloud.callFunction is unavailable'
-      }))
-      refreshBatchStatus(failedTask && failedTask.batchId)
-      return failedTask
-    }
-    return fallbackToLocalMock(sourceTask, {
+    const failedTask = patchTask(taskId, buildWanxFailurePatch(sourceTask, {
       errorCode: 'WX_CLOUD_UNAVAILABLE',
       message: 'wx.cloud.callFunction is unavailable'
-    })
+    }))
+    refreshBatchStatus(failedTask && failedTask.batchId)
+    return failedTask
   }
 
   try {
@@ -878,12 +856,9 @@ export async function runWanxTask(task, options = {}) {
     })
     return nextTask
   } catch (error) {
-    if (options.fallbackToMock === false || isGarmentReplaceTask(sourceTask) || isPatternStructureTask(sourceTask)) {
-      const failedTask = patchTask(taskId, buildWanxFailurePatch(sourceTask, error))
-      refreshBatchStatus(failedTask && failedTask.batchId)
-      return failedTask
-    }
-    return fallbackToLocalMock(sourceTask, error)
+    const failedTask = patchTask(taskId, buildWanxFailurePatch(sourceTask, error))
+    refreshBatchStatus(failedTask && failedTask.batchId)
+    return failedTask
   }
 }
 
@@ -956,6 +931,8 @@ function buildMockResult(task) {
 }
 
 export function simulateTask(taskId, options = {}) {
+  throw Object.assign(new Error('正式版本不支持 mock 任务'), { code: 'MOCK_GENERATION_DISABLED' })
+  /* istanbul ignore next */
   const normalizedTaskId = String(taskId || '').trim()
   const task = getTask(normalizedTaskId)
   if (!task) {
@@ -1014,13 +991,6 @@ export function simulateTask(taskId, options = {}) {
 
 export function createTaskAndRun(options = {}) {
   const normalizedOptions = normalizeGenerationTaskOptions(options)
-  const actionType = normalizedOptions.type || normalizedOptions.taskType || ''
-  const params = ((normalizedOptions.input || {}).params) || normalizedOptions.params || {}
-  const isRealProviderTest = params.realProviderTest === true && params.resultMode === 'real_provider_test'
-  if (!isRealProviderTest) {
-    assertIdentityProviderCapability(actionType)
-    assertGarmentProviderCapability(actionType, params.garmentMode || params.replaceMode || '')
-  }
   const idempotencyKey = String(
     normalizedOptions.clientTaskId ||
     ((normalizedOptions.input || {}).params || {}).idempotencyKey ||
@@ -1038,17 +1008,54 @@ export function createTaskAndRun(options = {}) {
     provider: 'wanx',
     mock: false
   })
-  runWanxTask(task, normalizedOptions.run || {}).catch((error) => {
-    console.warn('[taskLayer:wanx] async run failed', {
+  const taskParams = ((task.input || {}).params) || task.params || {}
+  const existingQuotaRecordId = String(taskParams.quotaRecordId || '').trim()
+  const runWithQuota = async () => {
+    let runnableTask = task
+    let quotaRecordId = existingQuotaRecordId
+    if (!quotaRecordId) {
+      const action = String(task.type || task.taskType || taskParams.actionType || '').trim()
+      const quota = await consumeQuota({ taskId: task.taskId, action, count: 1 })
+      quotaRecordId = quota.quotaRecordId
+      runnableTask = patchTask(task.taskId, {
+        input: {
+          ...(task.input || {}),
+          params: {
+            ...taskParams,
+            quotaRecordId,
+            quotaRecordStatus: quota.quotaRecordStatus,
+            quotaIdempotencyKey: quota.idempotencyKey,
+            estimatedCost: quota.cost
+          }
+        },
+        params: {
+          ...(task.params || {}),
+          quotaRecordId,
+          quotaRecordStatus: quota.quotaRecordStatus,
+          quotaIdempotencyKey: quota.idempotencyKey,
+          estimatedCost: quota.cost
+        }
+      }) || task
+    }
+    const result = await runWanxTask(runnableTask, { ...(normalizedOptions.run || {}), fallbackToMock: false })
+    if (!existingQuotaRecordId && quotaRecordId) settleQuotaByTask({ taskId: task.taskId, quotaRecordId, taskReader: getTask })
+    return result
+  }
+  runWithQuota().catch((error) => {
+    const failedTask = patchTask(task.taskId, buildWanxFailurePatch(getTask(task.taskId) || task, error))
+    refreshBatchStatus(failedTask && failedTask.batchId)
+    console.warn('[taskLayer:wanx] formal run failed', {
       taskId: task.taskId,
       type: task.type || task.taskType,
-      errorCode: (error && (error.errorCode || error.code)) || 'WANX_ASYNC_RUN_FAILED'
+      errorCode: (error && (error.errorCode || error.code)) || 'FORMAL_RUN_FAILED'
     })
   })
   return task
 }
 
 export function createTaskAndSimulate(options = {}) {
+  throw Object.assign(new Error('正式版本不支持 mock 任务'), { code: 'MOCK_GENERATION_DISABLED' })
+  /* istanbul ignore next */
   const normalizedOptions = normalizeGenerationTaskOptions(options)
   const idempotencyKey = String(
     normalizedOptions.clientTaskId ||

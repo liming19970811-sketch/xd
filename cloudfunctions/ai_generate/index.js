@@ -1,6 +1,5 @@
 ﻿const cloud = require('wx-server-sdk')
 const { getAdapter } = require('./adapters')
-const { generateMockResult } = require('./adapters/mock')
 const { getAiConfig, getAiConfigSummary } = require('./utils/config')
 const {
   normalizeFabricReplaceInput,
@@ -17,7 +16,6 @@ const {
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 
-const MOCK_FABRIC_REPLACE_IMAGE_URL = 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=900&q=80'
 const QUOTA_RECORDS_COLLECTION = 'membership_usage_records'
 
 function isExplicitTrue(value) {
@@ -29,12 +27,13 @@ function isProviderDryRunEnabled() {
 }
 
 function isRealQuotaGuardEnabled() {
-  return isExplicitTrue(process.env.ENABLE_REAL_QUOTA_GUARD)
+  return process.env.ENABLE_REAL_QUOTA_GUARD === undefined
+    ? true
+    : isExplicitTrue(process.env.ENABLE_REAL_QUOTA_GUARD)
 }
 
 function isProviderDryRunRequested(event = {}) {
-  const payload = getEventPayload(event)
-  return isProviderDryRunEnabled() || payload.dryRun === true
+  return isProviderDryRunEnabled()
 }
 
 function getEventPayload(event = {}) {
@@ -548,7 +547,7 @@ function createRealProviderDisabledResult(input = {}, config = {}) {
     reason: 'real_provider_disabled',
     errorCode: 'REAL_PROVIDER_DISABLED',
     fallbackErrorCode: 'REAL_PROVIDER_DISABLED',
-    fallbackToMock: true,
+    fallbackToMock: false,
     details: {
       provider: config.provider || '',
       requestedProvider: 'real',
@@ -825,26 +824,6 @@ function buildRealProviderPendingOutput(result = {}, quotaPreflight = {}, advanc
   }
 }
 
-function createFabricReplaceMockOutput(input = {}) {
-  const resultImageUrl = input.sourceImageUrl || MOCK_FABRIC_REPLACE_IMAGE_URL
-  return {
-    success: true,
-    ok: true,
-    action: 'fabricReplace',
-    taskId: input.taskId,
-    status: 'success',
-    resultImageUrl,
-    data: {
-      provider: 'mock',
-      requestedProvider: 'fabric_replace',
-      mock: true,
-      fallback: false,
-      actionType: 'fabric_replace',
-      fabricType: input.fabricType || ''
-    }
-  }
-}
-
 function createFabricReplaceConfigMissingOutput(input = {}, fabricConfig = {}) {
   return {
     success: false,
@@ -927,7 +906,7 @@ exports.main = async (event = {}) => {
     const switchMatrix = getProviderSwitchMatrix(config)
 
     if (action === 'debugConfig') {
-      const appStage = String(process.env.APP_STAGE || '').trim().toLowerCase()
+      const appStage = String(process.env.APP_STAGE || 'production').trim().toLowerCase()
       const mockFallbackEnabled = config.disableMockFallback !== true
       const endpointRegion = String(config.endpoint || '').includes('ap-southeast-1') ? 'ap-southeast-1' : (String(config.endpoint || '').includes('cn-beijing') || String(config.endpoint || '').includes('dashscope.aliyuncs.com') ? 'cn-beijing' : 'unknown')
       const supportedTaskTypes = ['identity_replace', 'head_replace', 'face_replace', 'virtual_try_on', 'garment_replace', 'top_replace', 'bottom_replace', 'full_outfit_replace', 'scene_replace', 'pose_replace', 'color_replace', 'fabric_replace', 'pattern_replace', 'style_remix', 'product_display', 'flat_lay', 'detail_image', 'batch_model']
@@ -1005,7 +984,7 @@ exports.main = async (event = {}) => {
 
       let response = null
       if (fabricProvider !== 'real') {
-        response = createFabricReplaceMockOutput(input)
+        response = createFabricReplaceConfigMissingOutput(input, fabricConfig)
       } else if (config.enableRealProviderCall !== true && config.providerDryRun !== true) {
         response = {
           success: false,
@@ -1015,7 +994,7 @@ exports.main = async (event = {}) => {
           status: 'failed',
           resultImageUrl: '',
           errorCode: 'REAL_PROVIDER_DISABLED',
-          message: 'Real AI provider is disabled. Use mock/fallback or explicitly enable ENABLE_REAL_PROVIDER_CALL on server.',
+          message: 'Real AI provider is disabled. Enable ENABLE_REAL_PROVIDER_CALL on the server.',
           data: {
             provider: 'real',
             requestedProvider: 'fabric_replace',
@@ -1324,25 +1303,17 @@ exports.main = async (event = {}) => {
           rollbackStatus: rollbackResult.status || (rollbackResult.data && rollbackResult.data.status) || 'rolled_back'
         })
       }
-      if (config.disableMockFallback === true) {
-        return buildRealProviderFailureOutput({
-          errorCode: fallbackErrorCode || 'REAL_PROVIDER_FAILED',
-          reason: fallbackReason || 'real_provider_failed',
-          taskId: input.taskId,
-          providerTaskId: getRealProviderTaskId(generateResult || {}),
-          providerStatus: getRealProviderStatus(generateResult || {}) || 'failed',
-          quotaRecordId: '',
-          quotaRecordStatus: 'not_consumed',
-          quotaRolledBack: false,
-          rollbackStatus: 'not_required'
-        })
-      }
-      generateResult = await generateMockResult(input)
-      generateResult.provider = 'mock'
-      generateResult.requestedProvider = 'real'
-      generateResult.fallback = true
-      generateResult.fallbackReason = fallbackReason
-      generateResult.fallbackErrorCode = fallbackErrorCode
+      return buildRealProviderFailureOutput({
+        errorCode: fallbackErrorCode || 'REAL_PROVIDER_FAILED',
+        reason: fallbackReason || 'real_provider_failed',
+        taskId: input.taskId,
+        providerTaskId: getRealProviderTaskId(generateResult || {}),
+        providerStatus: getRealProviderStatus(generateResult || {}) || 'failed',
+        quotaRecordId: '',
+        quotaRecordStatus: 'not_consumed',
+        quotaRolledBack: false,
+        rollbackStatus: 'not_required'
+      })
     }
 
     if (!generateResult) {

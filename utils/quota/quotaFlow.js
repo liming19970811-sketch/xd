@@ -1,4 +1,3 @@
-import { getTask } from '../task/taskLayer'
 import { initCloudBase, isCloudBaseReady } from '../cloudbase/init'
 import { GENERATION_STATUSES, normalizeGenerationStatus } from '../task/generationContract'
 
@@ -135,13 +134,16 @@ export async function rollbackQuota(quotaRecordId = '', reason = 'task_failed') 
   return result
 }
 
-export function settleQuotaByTask({ taskId = '', quotaRecordId = '', intervalMs = 800, maxAttempts = 180 } = {}) {
+export function settleQuotaByTask({ taskId = '', quotaRecordId = '', taskReader, intervalMs = 800, maxAttempts = 180 } = {}) {
+  if (typeof taskReader !== 'function') {
+    throw createQuotaError('TASK_READER_REQUIRED', '额度结算缺少任务状态读取器')
+  }
   let attempts = 0
   let settled = false
   const settle = async () => {
     if (settled) return
     attempts += 1
-    const task = getTask(taskId)
+    const task = taskReader(taskId)
     const taskStatus = task ? normalizeGenerationStatus(task.status) : ''
     if (task && taskStatus === GENERATION_STATUSES.COMPLETED) {
       settled = true

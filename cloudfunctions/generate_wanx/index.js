@@ -42,52 +42,30 @@ const POSE_REPLACE_ACTIONS = new Set(['pose_replace', 'pose_adjust', 'pose_varia
 const PATTERN_REPLACE_ACTIONS = new Set(['pattern_replace', 'pattern_variation', 'print_generate', 'print_placement'])
 const STYLE_REFERENCE_ACTIONS = new Set(['micro_redesign', 'style_redesign', 'hot_style_remix'])
 const MODEL_PROFILE_COLLECTION = 'modelProfiles'
-const USERS_COLLECTION = 'users'
 const QUOTA_RECORDS_COLLECTION = 'membership_usage_records'
-const INTERNAL_TEST_ROLES = new Set(['admin', 'super_admin', 'platform_admin', 'internaltester', 'internal_tester', 'tester', 'developer', 'tech', 'ops', 'algorithm'])
 
-function envFlag(name = '') {
-  return String(process.env[name] || '').trim().toLowerCase() === 'true'
+function envFlag(name = '', fallback = false) {
+  const value = String(process.env[name] || '').trim().toLowerCase()
+  return value ? value === 'true' : fallback
 }
 
-function envList(name = '') {
-  return String(process.env[name] || '').split(',').map((item) => item.trim()).filter(Boolean)
+function getAppStage() {
+  return String(process.env.APP_STAGE || 'production').trim().toLowerCase()
 }
 
-function getUserRoles(user = {}) {
-  return [user.role, user.memberRole, user.systemRole, ...(Array.isArray(user.roles) ? user.roles : [])]
-    .map((role) => String(role || '').trim().toLowerCase())
-    .filter(Boolean)
-}
-
-async function findInternalTester(openid = '') {
-  if (!openid) return null
-  if (envList('INTERNAL_TEST_OPENIDS').includes(openid)) return { source: 'environment_whitelist', roles: ['internal_tester'] }
-  for (const condition of [{ _openid: openid }, { openid }, { openId: openid }]) {
-    try {
-      const response = await db.collection(USERS_COLLECTION).where(condition).limit(1).get()
-      const user = response && response.data && response.data[0]
-      if (user && getUserRoles(user).some((role) => INTERNAL_TEST_ROLES.has(role))) return user
-    } catch (error) {
-      // Continue through the supported legacy identity fields.
-    }
-  }
-  return null
-}
-
-async function verifyRealProviderTestRequest(params = {}, taskId = '') {
-  const appStage = String(process.env.APP_STAGE || '').trim().toLowerCase()
-  if (!['development', 'testing'].includes(appStage)) return { ok: false, errorCode: 'APP_STAGE_NOT_TESTABLE', message: '当前运行环境不允许内部真实 API 测试' }
-  if (!envFlag('ENABLE_REAL_PROVIDER_CALL')) return { ok: false, errorCode: 'REAL_PROVIDER_DISABLED', message: '真实 Provider 调用开关未开启' }
-  if (!envFlag('ENABLE_REAL_PROVIDER_TEST')) return { ok: false, errorCode: 'REAL_PROVIDER_TEST_DISABLED', message: '内部真实 API 测试开关未开启' }
-  if (!envFlag('ENABLE_REAL_QUOTA_GUARD')) return { ok: false, errorCode: 'REAL_QUOTA_DISABLED', message: '真实额度保护未开启' }
-  if (!envFlag('ALLOW_EXPERIMENTAL_PROVIDER')) return { ok: false, errorCode: 'EXPERIMENTAL_PROVIDER_DISABLED', message: '实验 Provider 调用未获允许' }
+async function verifyFormalProviderRequest(params = {}, taskId = '') {
+  const appStage = getAppStage()
+  if (appStage !== 'production') return { ok: false, errorCode: 'APP_STAGE_NOT_PRODUCTION', message: '云端运行环境尚未切换为 production' }
+  if (!envFlag('ENABLE_REAL_PROVIDER_CALL', true)) return { ok: false, errorCode: 'REAL_PROVIDER_DISABLED', message: '真实 Provider 调用开关未开启' }
+  if (!envFlag('ENABLE_REAL_QUOTA_GUARD', true)) return { ok: false, errorCode: 'REAL_QUOTA_DISABLED', message: '真实额度保护未开启' }
   if (envFlag('PROVIDER_DRY_RUN')) return { ok: false, errorCode: 'PROVIDER_DRY_RUN_ENABLED', message: 'Provider 当前仍为 dry run' }
-  if (!envFlag('DISABLE_MOCK_FALLBACK')) return { ok: false, errorCode: 'MOCK_FALLBACK_NOT_DISABLED', message: '真实测试必须关闭 mock fallback' }
+  if (!envFlag('DISABLE_MOCK_FALLBACK', true)) return { ok: false, errorCode: 'MOCK_FALLBACK_NOT_DISABLED', message: '正式生成必须关闭 mock fallback' }
+  if (params.formalProviderRequest !== true || params.resultMode !== 'formal' || params.isMock === true) {
+    return { ok: false, errorCode: 'FORMAL_REQUEST_REQUIRED', message: '请求不是正式生成请求' }
+  }
   const context = cloud.getWXContext ? cloud.getWXContext() : {}
   const openid = String((context && context.OPENID) || '').trim()
-  const tester = await findInternalTester(openid)
-  if (!tester) return { ok: false, errorCode: 'INTERNAL_TEST_ACCOUNT_REQUIRED', message: 'Internal tester authorization is required' }
+  if (!openid) return { ok: false, errorCode: 'TRUSTED_IDENTITY_REQUIRED', message: '无法取得可信用户身份' }
 
   const quotaRecordId = String(params.quotaRecordId || '').trim()
   if (!quotaRecordId) return { ok: false, errorCode: 'REAL_QUOTA_RECORD_REQUIRED', message: 'A consumed quota record is required' }
@@ -131,26 +109,33 @@ function getSafeDebugConfig() {
   return {
     provider: 'wanx',
     model,
-    appStage: String(process.env.APP_STAGE || '').trim().toLowerCase(),
-    realProviderEnabled: envFlag('ENABLE_REAL_PROVIDER_CALL') && envFlag('ENABLE_REAL_PROVIDER_TEST'),
-    realQuotaGuardEnabled: envFlag('ENABLE_REAL_QUOTA_GUARD'),
+    appStage: getAppStage(),
+    realProviderEnabled: envFlag('ENABLE_REAL_PROVIDER_CALL', true),
+    realQuotaGuardEnabled: envFlag('ENABLE_REAL_QUOTA_GUARD', true),
     dryRun: envFlag('PROVIDER_DRY_RUN'),
     hasEndpoint: isMultimodalGenerationEndpoint(endpoint),
     endpointRegion: getEndpointRegion(endpoint),
     hasApiKey: Boolean(String(process.env.DASHSCOPE_API_KEY || '').trim()),
     hasPollEndpoint: Boolean(getWanxTaskEndpoint()),
-    mockFallbackEnabled: !envFlag('DISABLE_MOCK_FALLBACK'),
+    mockFallbackEnabled: !envFlag('DISABLE_MOCK_FALLBACK', true),
+    switchMatrixAllowed: getAppStage() === 'production' &&
+      envFlag('ENABLE_REAL_PROVIDER_CALL', true) && envFlag('ENABLE_REAL_QUOTA_GUARD', true) &&
+      !envFlag('PROVIDER_DRY_RUN') && envFlag('DISABLE_MOCK_FALLBACK', true),
     supportedTaskTypes: [
-      'head_replace', 'face_replace', 'garment_replace', 'pose_replace', 'pose_adjust',
+      'model_replace', 'head_replace', 'face_replace', 'clothes_replace', 'virtual_try_on',
+      'garment_replace', 'top_replace', 'bottom_replace', 'full_outfit_replace', 'pose_replace', 'pose_adjust',
       'scene_replace', 'color_replace', 'fabric_replace', 'pattern_replace',
       'micro_redesign', 'style_redesign', 'flat_lay_generate', 'detail_photo_generate',
       'display_3d_generate', 'hanging_photo_generate', 'mannequin_generate',
-      'pattern_structure_generate', 'ai_model_image'
+      'pattern_structure_generate', 'ai_model_image', 'flat_lay', 'detail_photo',
+      'detail_page_long_image', 'marketing_asset', 'image_to_sketch', 'text_to_sketch',
+      'sketch_remix', 'batch_model', 'ai_production_plan', 'ecommerce_main',
+      'cross_border_white', 'xiaohongshu_seed'
     ]
   }
 }
 
-async function settleRealProviderTestQuota(context = null, response = {}) {
+async function settleFormalProviderQuota(context = null, response = {}) {
   if (!context || !context.quotaRecordId || context.quotaStatus === 'finalized') return response
   const hasValidImage = response && response.success === true && Boolean(response.resultImageUrl)
   // The client task layer persists the temporary provider URL to Cloud Storage first.
@@ -521,21 +506,20 @@ exports.main = async (event = {}) => {
   const imageUrl = payload.imageUrl || ''
   const prompt = payload.prompt || ''
   const params = { ...(payload.params || {}) }
-  const realProviderTest = params.realProviderTest === true && params.resultMode === 'real_provider_test'
-  let realProviderTestContext = null
-  if (realProviderTest) {
-    realProviderTestContext = await verifyRealProviderTestRequest(params, taskId)
-    if (!realProviderTestContext.ok) {
-      const quotaFailure = String(realProviderTestContext.errorCode || '').includes('QUOTA')
-      return createSceneError(taskId, quotaFailure ? 'quota_failed' : 'provider_request_invalid', realProviderTestContext.message, {
-        providerCode: realProviderTestContext.errorCode,
+  const formalProviderRequest = params.formalProviderRequest === true && params.resultMode === 'formal' && params.isMock !== true
+  const formalProviderContext = await verifyFormalProviderRequest(params, taskId)
+  if (!formalProviderContext.ok) {
+      const quotaFailure = String(formalProviderContext.errorCode || '').includes('QUOTA')
+      return createSceneError(taskId, quotaFailure ? 'quota_failed' : 'provider_request_invalid', formalProviderContext.message, {
+        providerCode: formalProviderContext.errorCode,
         failureStage: quotaFailure ? 'quota_preflight' : 'provider_preflight'
       })
-    }
   }
-  const finish = (response = {}) => settleRealProviderTestQuota(realProviderTest ? realProviderTestContext : null, {
+  const finish = (response = {}) => settleFormalProviderQuota(formalProviderRequest ? formalProviderContext : null, {
     ...response,
-    ...(realProviderTest ? { resultMode: 'real_provider_test', isExperimental: true, isMock: false } : {})
+    resultMode: 'formal',
+    isExperimental: false,
+    isMock: false
   })
   const actionType = normalizeActionType(payload, params)
   const sceneReplace = isSceneReplaceAction(actionType)
@@ -566,10 +550,6 @@ exports.main = async (event = {}) => {
     : null
   const fabricValidation = fabricReplace ? validateFabricReplaceParams(params, imageUrl) : null
 
-  if (poseReplace && !realProviderTest) {
-    return createSceneError(taskId, 'POSE_CONTROL_NOT_SUPPORTED', 'Current provider does not support reliable pose control')
-  }
-
   if (sceneReplace && sceneMode === 'exact_composite' && !sceneReferenceImage) {
     return createSceneError(taskId, 'SCENE_REFERENCE_REQUIRED', 'Scene reference image is required')
   }
@@ -587,7 +567,7 @@ exports.main = async (event = {}) => {
   }
   const garmentExperimentalSupported = garmentCapabilityValidation && garmentCapabilityValidation.capability.supportsMultipleImages &&
     garmentCapabilityValidation.capability.maxReferenceImages >= ((garmentValidation && garmentValidation.input.replaceMode === 'separate') ? 2 : 1)
-  if (garmentCapabilityValidation && !garmentCapabilityValidation.ok && !(realProviderTest && garmentExperimentalSupported)) {
+  if (garmentCapabilityValidation && !garmentCapabilityValidation.ok && !garmentExperimentalSupported) {
     console.log('[garment-replace:blocked]', {
       actionType: 'garment_replace',
       modelName,
@@ -595,7 +575,7 @@ exports.main = async (event = {}) => {
       ...garmentCapabilityValidation.capability,
       errorCode: garmentCapabilityValidation.errorCode
     })
-    return finish(createSceneError(taskId, realProviderTest ? 'provider_capability_mismatch' : garmentCapabilityValidation.errorCode, garmentCapabilityValidation.message))
+    return finish(createSceneError(taskId, 'provider_capability_mismatch', garmentCapabilityValidation.message))
   }
   if (patternValidation && !patternValidation.ok) {
     return createSceneError(taskId, patternValidation.errorCode, patternValidation.message)
@@ -607,7 +587,7 @@ exports.main = async (event = {}) => {
     return finish(createSceneError(taskId, identityValidation.errorCode, identityValidation.message))
   }
   const identityExperimentalSupported = identityCapabilityValidation && identityCapabilityValidation.capability.supportsMultipleImages && identityCapabilityValidation.capability.maxReferenceImages >= 1
-  if (identityCapabilityValidation && !identityCapabilityValidation.ok && !(realProviderTest && identityExperimentalSupported)) {
+  if (identityCapabilityValidation && !identityCapabilityValidation.ok && !identityExperimentalSupported) {
     console.log('[identity-replace:blocked]', {
       actionType,
       modelName,
@@ -616,7 +596,7 @@ exports.main = async (event = {}) => {
       ...identityCapabilityValidation.capability,
       errorCode: identityCapabilityValidation.errorCode
     })
-    return finish(createSceneError(taskId, realProviderTest ? 'provider_capability_mismatch' : identityCapabilityValidation.errorCode, identityCapabilityValidation.message))
+    return finish(createSceneError(taskId, 'provider_capability_mismatch', identityCapabilityValidation.message))
   }
   if (fabricValidation && !fabricValidation.ok) {
     return createSceneError(taskId, fabricValidation.errorCode, fabricValidation.message)
@@ -932,8 +912,7 @@ exports.main = async (event = {}) => {
 
     const identityOutputSize = identityReplace ? buildIdentityOutputSize(identityValidation.input) : ''
 
-    if (realProviderTest) {
-      console.log('[real-provider-test:request]', {
+    console.log('[formal-provider:request]', {
         taskId,
         provider: 'wanx',
         modelName,
@@ -942,9 +921,8 @@ exports.main = async (event = {}) => {
         inputImageCount: providerContent.filter((item) => item && item.image).length,
         dryRun: false,
         mockFallback: false,
-        quotaStatus: realProviderTestContext.quotaStatus
+        quotaStatus: formalProviderContext.quotaStatus
       })
-    }
 
     const submitResult = await requestWanx(wanxEndpoint, {
       method: 'POST',
@@ -1081,8 +1059,7 @@ exports.main = async (event = {}) => {
       })
     }
 
-    if (realProviderTest) {
-      console.log('[real-provider-test:result]', {
+    console.log('[formal-provider:result]', {
         taskId,
         provider: 'wanx',
         modelName,
@@ -1090,7 +1067,6 @@ exports.main = async (event = {}) => {
         providerRequestId: finalData.request_id || finalData.requestId || dashscopeTaskId || '',
         hasValidImage: true
       })
-    }
 
     return finish({
       success: true,
